@@ -1,66 +1,66 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Briefcase, Search, Wrench, Zap } from "lucide-react";
+import { Briefcase, Wrench, FileText, Zap } from "lucide-react";
 
 export default function ChoiceScreen() {
   const navigate = useNavigate();
-  const [firstName, setFirstName] = useState("");
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
 
-  useEffect(() => {
-    // Retrieve user info from localStorage (after login)
-    const userData = JSON.parse(localStorage.getItem("user"));
-    if (userData && userData.full_name) {
-      const nameParts = userData.full_name.trim().split(" ");
-      setFirstName(nameParts[0].toUpperCase());
-    }
-  }, []);
-
-  const options = [
+  const actions = [
     {
       title: "Post a Job",
-      icon: <Briefcase size={48} color="#FF8C00" />,
+      desc: "Create and share new job openings easily.",
+      icon: <FileText size={32} />,
+      color: "bg-orange-500/10 border-orange-400/30 hover:bg-orange-500/20",
       route: "/post-job",
-      description: "Create and share new job openings easily.",
     },
     {
       title: "Find a Job",
-      icon: <Search size={48} color="#FF8C00" />,
-      route: "/find-job",
-      description: "Discover job listings near your location.",
+      desc: "Discover job listings near your location.",
+      icon: <Briefcase size={32} />,
+      color: "bg-blue-500/10 border-blue-400/30 hover:bg-blue-500/20",
+      route: "/find-jobs",
     },
     {
       title: "Find Skilled Artisan",
-      icon: <Wrench size={48} color="#FF8C00" />,
+      desc: "Locate reliable artisans in your area.",
+      icon: <Wrench size={32} />,
+      color: "bg-green-500/10 border-green-400/30 hover:bg-green-500/20",
       route: "/find-artisan",
-      description: "Locate reliable artisans in your area.",
     },
     {
       title: "Manage Utilities",
-      icon: <Zap size={48} color="#FF8C00" />,
+      desc: "Pay bills, airtime, and data with ease.",
+      icon: <Zap size={32} />,
+      color: "bg-purple-500/10 border-purple-400/30 hover:bg-purple-500/20",
       route: "/utilities",
-      description: "Pay bills, airtime, and data with ease.",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-[#0A1F44] flex flex-col items-center justify-center text-white px-6 py-10">
-      <h1 className="text-2xl md:text-3xl font-bold mb-2 text-center">
-        WELCOME TO SPECTRUM ARENA {firstName || ""}
-      </h1>
-      <p className="text-white/80 mb-10 text-center">
-        What would you like to do today?
-      </p>
+    <div className="min-h-screen bg-[#0b173d] text-white flex flex-col items-center justify-center px-6 py-10 font-sans">
+      <div className="text-center mb-12">
+        <h1 className="text-2xl md:text-3xl font-extrabold mb-2 text-white">
+          WELCOME TO <span className="text-orange-400">SPECTRUM ARENA</span>{" "}
+          {user?.full_name ? user.full_name.toUpperCase() : ""}
+        </h1>
+        <p className="text-gray-300">What would you like to do today?</p>
+      </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-3xl">
-        {options.map((opt, idx) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-4xl">
+        {actions.map((item, i) => (
           <div
-            key={idx}
-            onClick={() => navigate(opt.route)}
-            className="cursor-pointer bg-white/10 hover:bg-white/20 transition-all duration-300 rounded-2xl shadow-md p-8 flex flex-col items-center justify-center text-center"
+            key={i}
+            onClick={() => navigate(item.route)}
+            className={`cursor-pointer border rounded-2xl p-6 transition-all ${item.color} hover:scale-[1.02]`}
           >
-            {opt.icon}
-            <h3 className="mt-4 text-xl font-semibold">{opt.title}</h3>
-            <p className="mt-2 text-white/70 text-sm">{opt.description}</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-bold text-orange-400 mb-1">{item.title}</h2>
+                <p className="text-sm text-gray-300">{item.desc}</p>
+              </div>
+              <div className="text-orange-400">{item.icon}</div>
+            </div>
           </div>
         ))}
       </div>
