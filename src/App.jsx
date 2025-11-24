@@ -1,15 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-  Link,
-  useNavigate,
-} from "react-router-dom";
-
+import { BrowserRouter as Router, Routes, Route, Navigate, Link, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { Toaster } from "react-hot-toast";
 
 // Pages
 import ChoiceScreen from "./pages/ChoiceScreen";
@@ -20,21 +13,22 @@ import JobProfile from "./pages/JobProfile";
 import ArtisanProfile from "./pages/ArtisanProfile";
 import CreateSavings from "./pages/CreateSavings";
 import MySavings from "./pages/MySavings";
+import SavingsActivity from "./pages/SavingsActivity";
 import WithdrawSavings from "./pages/WithdrawSavings";
 
-// ---------------------------- API CONFIG ----------------------------
+// API CONFIG
 const api = axios.create({
   baseURL: process.env.REACT_APP_API_BASE || "http://127.0.0.1:8000/api/",
   headers: { "Content-Type": "application/json" },
 });
 
-// ---------------------------- PRIVATE ROUTE ----------------------------
+// PRIVATE ROUTE
 function PrivateRoute({ children }) {
   const token = localStorage.getItem("token");
   return token ? children : <Navigate to="/" replace />;
 }
 
-// ---------------------------- NAVBAR ----------------------------
+// NAVBAR
 function Navbar({ onOpenSignup, onOpenLogin }) {
   return (
     <nav className="w-full bg-deepBlue text-white py-5 px-6 md:px-12 flex items-center justify-between">
@@ -46,7 +40,7 @@ function Navbar({ onOpenSignup, onOpenLogin }) {
       <div className="hidden md:flex items-center gap-8 text-lg">
         <Link to="/" className="hover:underline">Home</Link>
         <Link to="/find-jobs" className="hover:underline">Find Jobs</Link>
-        <Link to="/find-artisans" className="hover:underline">Find Artisan</Link>
+        <Link to="/find-artisans" className="hover:underline">Find Artisans</Link>
         <Link to="/savings" className="hover:underline">Savings & Thrift</Link>
       </div>
 
@@ -59,7 +53,7 @@ function Navbar({ onOpenSignup, onOpenLogin }) {
         </button>
         <button
           onClick={onOpenSignup}
-          className="bg-brightOrange text-deepBlue font-semibold px-4 py-2 rounded-md shadow-md"
+          className="bg-brightOrange text-deepBlue font-semibold px-4 py-2 rounded-md shadow"
         >
           Get Started
         </button>
@@ -68,21 +62,21 @@ function Navbar({ onOpenSignup, onOpenLogin }) {
   );
 }
 
-// ---------------------------- HERO ----------------------------
+// HERO SECTION
 function Hero({ onOpenSignup }) {
   return (
-    <header className="min-h-[60vh] flex items-center justify-center text-center px-6 md:px-12 bg-deepBlue text-white">
+    <header className="min-h-[60vh] flex items-center justify-center text-center px-6 md:px-12 bg-deepBlue">
       <div className="max-w-4xl">
         <h1 className="text-4xl md:text-6xl font-extrabold leading-tight">
           Connect, Skill & Earn with Spectrum Arena
         </h1>
         <p className="mt-6 text-lg text-white/80">
-          Spectrum Arena helps you find artisans, post jobs, and manage savings — all in one place.
+          Spectrum Arena helps you find artisans, post jobs, and manage savings — all in one platform.
         </p>
         <div className="mt-10">
           <button
             onClick={onOpenSignup}
-            className="bg-brightOrange text-deepBlue font-bold px-8 py-3 rounded-lg shadow-lg"
+            className="bg-brightOrange text-deepBlue font-bold px-8 py-3 rounded-lg shadow hover:opacity-90"
           >
             Get Started
           </button>
@@ -92,7 +86,7 @@ function Hero({ onOpenSignup }) {
   );
 }
 
-// ---------------------------- FOOTER ----------------------------
+// FOOTER
 function Footer() {
   return (
     <footer id="contact" className="bg-deepBlue text-white py-8 px-6 md:px-12">
@@ -104,6 +98,7 @@ function Footer() {
             <div className="text-sm text-white/70">info@spectrumarena.com</div>
           </div>
         </div>
+
         <div className="text-center text-sm text-white/60">
           © {new Date().getFullYear()} Spectrum Arena. All rights reserved.
         </div>
@@ -112,7 +107,7 @@ function Footer() {
   );
 }
 
-// ---------------------------- SIGNUP MODAL ----------------------------
+// SIGNUP MODAL
 function SignupModal({ onClose }) {
   const [full_name, setFullName] = useState("");
   const [phone_number, setPhone] = useState("");
@@ -122,7 +117,6 @@ function SignupModal({ onClose }) {
 
   async function submit(e) {
     e.preventDefault();
-
     try {
       const resp = await api.post("users/signup/", {
         full_name,
@@ -133,9 +127,8 @@ function SignupModal({ onClose }) {
 
       localStorage.setItem("token", resp.data.access);
       navigate("/choice");
-
       onClose();
-    } catch (err) {
+    } catch {
       alert("Signup failed");
     }
   }
@@ -146,37 +139,22 @@ function SignupModal({ onClose }) {
         <button onClick={onClose} className="absolute top-4 left-4 text-gray-300 hover:text-white">
           <ArrowLeft size={22} />
         </button>
+
         <h4 className="text-center font-bold text-lg mb-4">Create account</h4>
 
         <form onSubmit={submit} className="flex flex-col gap-3">
-          <input
-            value={full_name}
-            onChange={(e) => setFullName(e.target.value)}
-            placeholder="Full name"
-            className="bg-black/20 p-3 rounded-md outline-none"
-            required
-          />
-          <input
-            value={phone_number}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="Phone number"
-            className="bg-black/20 p-3 rounded-md outline-none"
-            required
-          />
-          <input
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email (optional)"
-            className="bg-black/20 p-3 rounded-md outline-none"
-          />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            className="bg-black/20 p-3 rounded-md outline-none"
-            required
-          />
+          <input className="bg-black/20 p-3 rounded-md" placeholder="Full name" required
+            value={full_name} onChange={(e) => setFullName(e.target.value)} />
+
+          <input className="bg-black/20 p-3 rounded-md" placeholder="Phone number" required
+            value={phone_number} onChange={(e) => setPhone(e.target.value)} />
+
+          <input className="bg-black/20 p-3 rounded-md" placeholder="Email (optional)"
+            value={email} onChange={(e) => setEmail(e.target.value)} />
+
+          <input type="password" className="bg-black/20 p-3 rounded-md" placeholder="Password" required
+            value={password} onChange={(e) => setPassword(e.target.value)} />
+
           <button className="mt-3 bg-brightOrange text-deepBlue font-semibold p-3 rounded-md">
             Sign up
           </button>
@@ -186,7 +164,7 @@ function SignupModal({ onClose }) {
   );
 }
 
-// ---------------------------- LOGIN MODAL ----------------------------
+// LOGIN MODAL
 function LoginModal({ onClose }) {
   const [phone_number, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -194,16 +172,10 @@ function LoginModal({ onClose }) {
 
   async function submit(e) {
     e.preventDefault();
-
     try {
-      const resp = await api.post("token/", {
-        phone_number,
-        password,
-      });
-
+      const resp = await api.post("token/", { phone_number, password });
       localStorage.setItem("token", resp.data.access);
       navigate("/choice");
-
       onClose();
     } catch {
       alert("Login failed");
@@ -216,22 +188,16 @@ function LoginModal({ onClose }) {
         <button onClick={onClose} className="absolute top-4 left-4 text-gray-300 hover:text-white">
           <ArrowLeft size={22} />
         </button>
+
         <h4 className="text-center font-bold text-lg mb-4">Log in</h4>
 
         <form onSubmit={submit} className="flex flex-col gap-3">
-          <input
-            value={phone_number}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="Phone number"
-            className="bg-black/20 p-3 rounded-md outline-none"
-          />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            className="bg-black/20 p-3 rounded-md outline-none"
-          />
+          <input className="bg-black/20 p-3 rounded-md" placeholder="Phone number"
+            value={phone_number} onChange={(e) => setPhone(e.target.value)} />
+
+          <input type="password" className="bg-black/20 p-3 rounded-md" placeholder="Password"
+            value={password} onChange={(e) => setPassword(e.target.value)} />
+
           <button className="mt-3 bg-brightOrange text-deepBlue font-semibold p-3 rounded-md">
             Log in
           </button>
@@ -241,17 +207,14 @@ function LoginModal({ onClose }) {
   );
 }
 
-// ---------------------------- LANDING PAGE ----------------------------
+// LANDING PAGE
 function LandingPage() {
   const [showSignup, setShowSignup] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
 
   return (
     <div className="min-h-screen bg-deepBlue text-white font-sans">
-      <Navbar
-        onOpenSignup={() => setShowSignup(true)}
-        onOpenLogin={() => setShowLogin(true)}
-      />
+      <Navbar onOpenSignup={() => setShowSignup(true)} onOpenLogin={() => setShowLogin(true)} />
       <main>
         <Hero onOpenSignup={() => setShowSignup(true)} />
       </main>
@@ -263,36 +226,39 @@ function LandingPage() {
   );
 }
 
-// ---------------------------- MAIN ROUTER ----------------------------
+// MAIN ROUTER
 export default function App() {
   return (
-    <Router>
-      <Routes>
+    <>
+      <Toaster position="top-center" />
 
-        {/* PUBLIC */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/find-jobs" element={<FindJobs />} />
-        <Route path="/job/:id" element={<JobProfile />} />
-        <Route path="/find-artisans" element={<FindArtisans />} />
-        <Route path="/artisan/:id" element={<ArtisanProfile />} />
+      <Router>
+        <Routes>
+          {/* PUBLIC */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/find-jobs" element={<FindJobs />} />
+          <Route path="/job/:id" element={<JobProfile />} />
+          <Route path="/find-artisans" element={<FindArtisans />} />
+          <Route path="/artisan/:id" element={<ArtisanProfile />} />
 
-        {/* SAVINGS */}
-        <Route path="/savings" element={<MySavings />} />
-        <Route path="/savings/create" element={<CreateSavings />} />
-        <Route path="/savings/withdraw/:id" element={<WithdrawSavings />} />
+          {/* SAVINGS */}
+          <Route path="/savings" element={<MySavings />} />
+          <Route path="/savings/create" element={<CreateSavings />} />
+          <Route path="/savings/withdraw/:id" element={<WithdrawSavings />} />
+          <Route path="/savings/activity" element={<SavingsActivity />} />
 
-        {/* PROTECTED */}
-        <Route
-          path="/choice"
-          element={
-            <PrivateRoute>
-              <ChoiceScreen />
-            </PrivateRoute>
-          }
-        />
-
-      </Routes>
-    </Router>
+          {/* PROTECTED */}
+          <Route
+            path="/choice"
+            element={
+              <PrivateRoute>
+                <ChoiceScreen />
+              </PrivateRoute>
+            }
+          />
+        </Routes>
+      </Router>
+    </>
   );
 }
 

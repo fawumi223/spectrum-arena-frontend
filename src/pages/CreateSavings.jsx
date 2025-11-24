@@ -1,77 +1,105 @@
 import React, { useState } from "react";
+import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function CreateSavings() {
+  const navigate = useNavigate();
+
   const [amount, setAmount] = useState("");
-  const [days, setDays] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [lockedUntil, setLockedUntil] = useState("");
+  const [message, setMessage] = useState("");
 
-  const BASE = process.env.REACT_APP_API_BASE || "http://127.0.0.1:8000/api";
+  const BASE_URL =
+    process.env.REACT_APP_API_BASE || "http://127.0.0.1:8000/api";
 
-  async function submit() {
-    if (!amount || !days) return alert("Fill all fields");
+  const submit = async (e) => {
+    e.preventDefault();
+    setMessage("");
 
-    setLoading(true);
-
-    const unlock_date = new Date();
-    unlock_date.setDate(unlock_date.getDate() + Number(days));
-
-    const token = localStorage.getItem("token");
-
-    const res = await fetch(`${BASE}/savings/create/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        amount,
-        unlock_date: unlock_date.toISOString().split("T")[0],
-      }),
-    });
-
-    const data = await res.json();
-    setLoading(false);
-
-    if (res.ok) {
-      alert("Savings created successfully!");
-      window.location.href = "/savings";
-    } else {
-      alert(data.error || "Failed to create savings");
+    if (!lockedUntil) {
+      setMessage("Select unlock date");
+      return;
     }
-  }
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${BASE_URL}/savings/create/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          amount: amount || 0,
+          locked_until: lockedUntil,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("Savings created!");
+        navigate("/savings");
+      } else {
+        setMessage(data.error || "Failed to create savings");
+      }
+    } catch (err) {
+      setMessage("Network error");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-deepBlue text-white px-6 py-10">
-      <h1 className="text-3xl font-bold mb-8">Start a Savings Plan</h1>
 
-      <div className="bg-[#111827] p-6 rounded-xl border border-white/10 shadow-md max-w-md">
+      {/* Back */}
+      <button
+        onClick={() => navigate(-1)}
+        className="flex items-center gap-2 text-white/70 hover:text-white mb-8"
+      >
+        <ArrowLeft size={22} />
+        <span>Back</span>
+      </button>
 
-        {/* Amount */}
-        <input
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          placeholder="Enter amount (₦)"
-          type="number"
-          className="w-full bg-[#1a1d25] p-3 rounded-md mb-4 outline-none text-white"
-        />
+      <h1 className="text-3xl font-bold mb-6">Create Savings Plan</h1>
 
-        {/* Lock Period */}
-        <input
-          value={days}
-          onChange={(e) => setDays(e.target.value)}
-          placeholder="Lock duration (days)"
-          type="number"
-          className="w-full bg-[#1a1d25] p-3 rounded-md mb-4 outline-none text-white"
-        />
+      {message && <p className="text-red-400 mb-4">{message}</p>}
+
+      <form
+        onSubmit={submit}
+        className="bg-[#111827] p-6 rounded-xl border border-white/10 space-y-5"
+      >
+        {/* OPTIONAL INITIAL DEPOSIT */}
+        <div>
+          <label className="block mb-2 text-white/70">Initial Deposit (Optional)</label>
+          <input
+            type="number"
+            className="w-full bg-[#1f2937] p-3 text-white rounded-md outline-none"
+            placeholder="₦0.00"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+          />
+        </div>
+
+        {/* LOCK DATE */}
+        <div>
+          <label className="block mb-2 text-white/70">Unlock Date</label>
+          <input
+            type="date"
+            className="w-full bg-[#1f2937] p-3 text-white rounded-md outline-none"
+            value={lockedUntil}
+            onChange={(e) => setLockedUntil(e.target.value)}
+            required
+          />
+        </div>
 
         <button
-          disabled={loading}
-          onClick={submit}
-          className="w-full bg-brightOrange text-deepBlue font-bold py-3 rounded-md hover:opacity-90 transition"
+          type="submit"
+          className="w-full bg-brightOrange text-deepBlue font-bold py-3 rounded-lg hover:bg-orange-400"
         >
-          {loading ? "Creating..." : "Create Savings"}
+          Create Savings
         </button>
-      </div>
+      </form>
     </div>
   );
 }

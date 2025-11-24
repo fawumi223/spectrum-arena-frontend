@@ -13,7 +13,7 @@ export default function MySavings() {
     process.env.REACT_APP_API_BASE || "http://127.0.0.1:8000/api";
 
   // -----------------------------------------
-  // FETCH SAVINGS INFO
+  // LOAD USER SAVINGS
   // -----------------------------------------
   const loadSavings = async () => {
     try {
@@ -48,7 +48,7 @@ export default function MySavings() {
   }, []);
 
   // -----------------------------------------
-  // RENDER
+  // LOADING STATE
   // -----------------------------------------
   if (loading) {
     return (
@@ -78,20 +78,22 @@ export default function MySavings() {
         <p className="text-center text-red-400 mb-6">{message}</p>
       )}
 
-      {/* NO SAVINGS CREATED */}
+      {/* IF NO SAVINGS YET */}
       {!savings && (
         <div className="text-center">
-          <p className="text-white/60 mb-6">You have not created a savings plan yet.</p>
+          <p className="text-white/60 mb-6">
+            You have not created a savings plan yet.
+          </p>
           <Link
             to="/savings/create"
-            className="bg-brightOrange text-deepBlue font-bold px-6 py-3 rounded-lg inline-block"
+            className="bg-brightOrange text-deepBlue font-bold px-6 py-3 rounded-lg shadow-md hover:bg-orange-400"
           >
             Create Savings Plan
           </Link>
         </div>
       )}
 
-      {/* SAVINGS SUMMARY */}
+      {/* SAVINGS INFO */}
       {savings && (
         <div className="space-y-8">
 
@@ -103,14 +105,15 @@ export default function MySavings() {
             </p>
           </div>
 
-          {/* UNLOCK INFO */}
+          {/* LOCK INFO */}
           <div className="bg-[#111827] p-6 rounded-xl border border-white/10 shadow-md">
             <p className="text-white/70">Unlock Date:</p>
+
             <p className="text-lg font-semibold mt-1">
-              {new Date(savings.unlock_date).toDateString()}
+              {new Date(savings.locked_until).toDateString()}
             </p>
 
-            {new Date(savings.unlock_date) > new Date() ? (
+            {new Date(savings.locked_until) > new Date() ? (
               <p className="text-red-400 mt-2 text-sm">
                 🔒 Withdrawal is locked until the unlock date.
               </p>
@@ -122,47 +125,29 @@ export default function MySavings() {
           </div>
 
           {/* ACTION BUTTONS */}
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-4">
+
             <Link
               to="/savings/create"
-              className="bg-[#1f2937] text-white px-6 py-3 rounded-lg border border-white/20 flex-1 text-center"
+              className="bg-[#1f2937] text-white px-6 py-3 rounded-lg border border-white/10 hover:bg-[#2a3548]"
             >
               Add More Savings
             </Link>
 
             <Link
               to={`/savings/withdraw/${savings.id}`}
-              className="bg-brightOrange text-deepBlue font-bold px-6 py-3 rounded-lg flex-1 text-center"
+              className="bg-brightOrange text-deepBlue font-bold px-6 py-3 rounded-lg hover:bg-orange-400"
             >
               Withdraw
             </Link>
-          </div>
 
-          {/* TRANSACTION HISTORY (PHASE 2) */}
-          <div className="mt-10 bg-[#111827] p-6 rounded-xl border border-white/10">
-            <h2 className="text-xl font-semibold mb-4">Activity</h2>
+            <Link
+              to="/savings/activity"
+              className="bg-[#1f2937] text-white px-6 py-3 rounded-lg border border-white/10 hover:bg-[#2a3548]"
+            >
+              View Activity
+            </Link>
 
-            {(!savings.history || savings.history.length === 0) && (
-              <p className="text-white/60">No activity recorded yet.</p>
-            )}
-
-            {savings.history && savings.history.length > 0 && (
-              <div className="space-y-4">
-                {savings.history.map((item, i) => (
-                  <div key={i} className="border-b border-white/10 pb-3">
-                    <p className="font-semibold">
-                      {item.type === "deposit" ? "Deposit" : "Withdrawal"}
-                    </p>
-                    <p className="text-white/60">
-                      ₦{Number(item.amount).toLocaleString()}
-                    </p>
-                    <p className="text-xs text-white/40">
-                      {new Date(item.date).toDateString()}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         </div>
       )}
