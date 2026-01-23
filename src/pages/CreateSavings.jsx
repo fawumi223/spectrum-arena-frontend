@@ -6,22 +6,49 @@ export default function CreateSavings() {
   const navigate = useNavigate();
 
   const [amount, setAmount] = useState("");
-  const [lockedUntil, setLockedUntil] = useState("");
+  const [unlockDate, setUnlockDate] = useState("");
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const BASE_URL =
     process.env.REACT_APP_API_BASE || "http://127.0.0.1:8000/api";
+
+  // --------------------------------------------------
+  // Convert date → duration_days (backend expects days)
+  // --------------------------------------------------
+  const calculateDurationDays = () => {
+    const today = new Date();
+    const unlock = new Date(unlockDate);
+
+    const diffTime = unlock.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    return diffDays > 0 ? diffDays : 0;
+  };
 
   const submit = async (e) => {
     e.preventDefault();
     setMessage("");
 
-    if (!lockedUntil) {
-      setMessage("Select unlock date");
+    if (!amount || Number(amount) <= 0) {
+      setMessage("Enter a valid amount");
+      return;
+    }
+
+    if (!unlockDate) {
+      setMessage("Select an unlock date");
+      return;
+    }
+
+    const durationDays = calculateDurationDays();
+
+    if (durationDays < 1) {
+      setMessage("Unlock date must be in the future");
       return;
     }
 
     try {
+      setLoading(true);
       const token = localStorage.getItem("token");
 
       const res = await fetch(`${BASE_URL}/savings/create/`, {
@@ -31,27 +58,28 @@ export default function CreateSavings() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          amount: amount || 0,
-          locked_until: lockedUntil,
+          amount: Number(amount),
+          duration_days: durationDays,
         }),
       });
 
       const data = await res.json();
+      setLoading(false);
 
       if (res.ok) {
-        alert("Savings created!");
+        alert("Savings created successfully!");
         navigate("/savings");
       } else {
-        setMessage(data.error || "Failed to create savings");
+        setMessage(data.detail || "Failed to create savings");
       }
     } catch (err) {
-      setMessage("Network error");
+      setLoading(false);
+      setMessage("Network error. Try again.");
     }
   };
 
   return (
     <div className="min-h-screen bg-deepBlue text-white px-6 py-10">
-
       {/* Back */}
       <button
         onClick={() => navigate(-1)}
@@ -69,35 +97,37 @@ export default function CreateSavings() {
         onSubmit={submit}
         className="bg-[#111827] p-6 rounded-xl border border-white/10 space-y-5"
       >
-        {/* OPTIONAL INITIAL DEPOSIT */}
+        {/* AMOUNT */}
         <div>
-          <label className="block mb-2 text-white/70">Initial Deposit (Optional)</label>
+          <label className="block mb-2 text-white/70">Amount</label>
           <input
             type="number"
             className="w-full bg-[#1f2937] p-3 text-white rounded-md outline-none"
-            placeholder="₦0.00"
+            placeholder="₦5000"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
+            required
           />
         </div>
 
-        {/* LOCK DATE */}
+        {/* UNLOCK DATE */}
         <div>
           <label className="block mb-2 text-white/70">Unlock Date</label>
           <input
             type="date"
             className="w-full bg-[#1f2937] p-3 text-white rounded-md outline-none"
-            value={lockedUntil}
-            onChange={(e) => setLockedUntil(e.target.value)}
+            value={unlockDate}
+            onChange={(e) => setUnlockDate(e.target.value)}
             required
           />
         </div>
 
         <button
           type="submit"
-          className="w-full bg-brightOrange text-deepBlue font-bold py-3 rounded-lg hover:bg-orange-400"
+          disabled={loading}
+          className="w-full bg-brightOrange text-deepBlue font-bold py-3 rounded-lg disabled:opacity-60"
         >
-          Create Savings
+          {loading ? "Creating..." : "Create Savings"}
         </button>
       </form>
     </div>

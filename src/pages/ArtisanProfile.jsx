@@ -1,210 +1,142 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-
-// MAP (Leaflet)
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import L from "leaflet";
-
-// Components
-import HireArtisanModal from "../components/HireArtisanModal";
-import AllReviews from "../components/AllReviews";
-import WriteReviewModal from "../components/WriteReviewModal";
-
-// FIX LEAFLET ICONS (required)
-const defaultIcon = new L.Icon({
-  iconUrl: "/marker-icon.png",
-  shadowUrl: "/marker-shadow.png",
-});
-L.Marker.prototype.options.icon = defaultIcon;
+import React, { useState } from "react";
+import { useParams } from "react-router-dom";
+import mockArtisans from "../mocks/mockArtisans";
+import { MapPin, Star } from "lucide-react";
+import { saveHireRequest } from "../services/hireService";
+import BackButton from "../components/BackButton";
 
 export default function ArtisanProfile() {
   const { id } = useParams();
-  const navigate = useNavigate();
-
-  const [artisan, setArtisan] = useState(null);
-  const [loading, setLoading] = useState(true);
-
+  const artisan = mockArtisans.find((a) => a.id === Number(id));
   const [showHire, setShowHire] = useState(false);
-  const [showReview, setShowReview] = useState(false);
-
-  const BASE_URL = process.env.REACT_APP_API_BASE || "http://127.0.0.1:8000/api";
-
-  // ----------------------------------------
-  // LOAD ARTISAN PROFILE
-  // ----------------------------------------
-  const fetchProfile = async () => {
-    try {
-      const res = await fetch(`${BASE_URL}/artisans/${id}/`);
-      const data = await res.json();
-
-      // Handle GeoJSON
-      if (data.properties) {
-        setArtisan({
-          ...data.properties,
-          location: data.geometry,
-        });
-      } else {
-        setArtisan(data);
-      }
-
-      setLoading(false);
-    } catch (err) {
-      console.log("Profile load error", err);
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchProfile();
-  }, [id]);
-
-  // ----------------------------------------
-  // HIRE REQUEST SUBMISSION
-  // ----------------------------------------
-  async function submitHire(formData) {
-    const token = localStorage.getItem("token");
-    const response = await fetch(`${BASE_URL}/artisans/${id}/hire/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: token ? `Bearer ${token}` : "",
-      },
-      body: JSON.stringify(formData),
-    });
-
-    const data = await response.json();
-
-    alert(data.message || "Hire request sent!");
-    setShowHire(false);
-  }
-
-  // ----------------------------------------
-  // LOADING & NOT FOUND STATES
-  // ----------------------------------------
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-deepBlue text-white flex items-center justify-center">
-        Loading...
-      </div>
-    );
-  }
 
   if (!artisan) {
     return (
-      <div className="min-h-screen bg-deepBlue text-white flex items-center justify-center">
-        Artisan not found.
+      <div className="min-h-screen bg-[#0d1018] text-white flex items-center justify-center">
+        <p className="text-white/60">Artisan not found.</p>
       </div>
     );
   }
 
-  // Extract coordinates
-  const lat = artisan.location?.coordinates?.[1];
-  const lng = artisan.location?.coordinates?.[0];
+  async function submitHire(formData) {
+    saveHireRequest({
+      artisanId: id,
+      artisanName: artisan.full_name,
+      client: JSON.parse(localStorage.getItem("user") || "{}").full_name,
+      timestamp: new Date().toISOString(),
+      details: formData,
+    });
+
+    alert("Hire request submitted!");
+    setShowHire(false);
+  }
 
   return (
-    <div className="min-h-screen bg-deepBlue text-white px-6 py-10">
+    <div className="min-h-screen bg-[#0d1018] text-white px-6 py-10">
       <div className="max-w-4xl mx-auto">
 
-        {/* BACK BUTTON */}
-        <button
-          onClick={() => navigate(-1)}
-          className="mb-6 text-brightOrange hover:text-orange-300 font-semibold"
-        >
-          ← Back
-        </button>
+        <BackButton />
 
-        {/* PROFILE IMAGE */}
-        <div className="flex justify-center mb-6">
+        {/* PROFILE */}
+        <div className="flex flex-col items-center mb-6">
           <img
-            src={artisan.image || "/placeholder-user.png"}
+            src={artisan.image}
             alt={artisan.full_name}
             className="h-40 w-40 object-cover rounded-full border border-white/10 shadow-md"
           />
-        </div>
+          <h1 className="text-3xl font-bold mt-4 text-center">{artisan.full_name}</h1>
+          <p className="text-center text-brightOrange text-lg">{artisan.skill}</p>
 
-        {/* NAME */}
-        <h1 className="text-3xl font-bold text-center">{artisan.full_name}</h1>
-
-        {/* SKILL */}
-        <p className="text-center text-white/60 text-lg">{artisan.skill}</p>
-
-        {/* DISTANCE */}
-        {artisan.distance && (
-          <p className="text-center text-brightOrange mt-1">
-            {(artisan.distance / 1000).toFixed(2)} km away
-          </p>
-        )}
-
-        {/* CONTACT SECTION */}
-        <div className="mt-8 bg-[#111827] p-6 rounded-xl border border-white/10 shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Contact Details</h2>
-
-          <p className="mb-1"><strong>Phone:</strong> {artisan.phone}</p>
-          <p className="mb-1"><strong>Address:</strong> {artisan.address}</p>
-          <p className="mb-1"><strong>City:</strong> {artisan.city}</p>
-          <p className="mb-1"><strong>State:</strong> {artisan.state}</p>
-        </div>
-
-        {/* MAP */}
-        {lat && lng && (
-          <div className="mt-10">
-            <h2 className="text-xl font-semibold mb-3">Artisan Location</h2>
-
-            <MapContainer
-              center={[lat, lng]}
-              zoom={15}
-              style={{ height: "350px", width: "100%", borderRadius: "12px" }}
-            >
-              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-
-              <Marker position={[lat, lng]}>
-                <Popup>{artisan.full_name}</Popup>
-              </Marker>
-            </MapContainer>
+          <div className="flex items-center gap-2 mt-2 text-sm text-white/70">
+            <Star size={14} className="text-yellow-400" />
+            <span>{artisan.rating} ★</span>
           </div>
-        )}
 
-        {/* HIRE BUTTON */}
-        <div className="flex justify-center mt-10">
+          <div className="flex items-center gap-1 text-white/60 mt-2">
+            <MapPin size={14} />
+            {artisan.city}, {artisan.state}
+          </div>
+        </div>
+
+        {/* ABOUT */}
+        <div className="bg-[#111827] border border-white/10 rounded-xl p-6 shadow mb-6">
+          <h2 className="text-lg font-semibold mb-2">About</h2>
+          <p className="text-white/70 text-sm leading-relaxed">
+            Professional {artisan.skill.toLowerCase()} with over 3+ years of
+            proven experience. Reliable, skilled and trusted by many clients.
+          </p>
+        </div>
+
+        {/* CONTACT */}
+        <div className="bg-[#111827] border border-white/10 rounded-xl p-6 shadow mb-6">
+          <h2 className="text-lg font-semibold mb-2">Contact Details</h2>
+          <p className="text-white/80 text-sm"><strong>Phone:</strong> 0903 000 0000</p>
+          <p className="text-white/80 text-sm mt-1"><strong>City:</strong> {artisan.city}</p>
+          <p className="text-white/80 text-sm mt-1"><strong>State:</strong> {artisan.state}</p>
+        </div>
+
+        {/* ACTIONS */}
+        <div className="flex flex-col sm:flex-row gap-3 mt-6">
           <button
             onClick={() => setShowHire(true)}
-            className="bg-brightOrange text-deepBlue font-bold px-8 py-3 rounded-lg hover:bg-orange-400 transition"
+            className="flex-1 bg-brightOrange text-deepBlue py-3 rounded-lg font-semibold hover:bg-orange-400"
           >
-            Hire Artisan
+            Hire {artisan.full_name}
           </button>
 
           <button
-            onClick={() => setShowReview(true)}
-            className="ml-3 bg-[#1a1d25] border border-white/10 px-8 py-3 rounded-lg hover:border-brightOrange transition"
+            onClick={() => alert("Reviews coming soon")}
+            className="flex-1 bg-[#1a1d25] border border-white/10 py-3 rounded-lg font-semibold"
           >
-            Write Review
+            Show Reviews
           </button>
         </div>
 
-        {/* REVIEWS LIST */}
-        <div className="mt-10">
-          <AllReviews artisanId={id} />
+        {showHire && (
+          <HireFormModal
+            onClose={() => setShowHire(false)}
+            onSubmit={submitHire}
+            artisan={artisan}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function HireFormModal({ onClose, onSubmit, artisan }) {
+  const [message, setMessage] = useState("");
+
+  return (
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+      <div className="bg-[#111827] text-white p-6 rounded-xl w-full max-w-md">
+        <h2 className="text-lg font-semibold mb-4">
+          Hire {artisan.full_name}
+        </h2>
+
+        <textarea
+          placeholder="Describe your request..."
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          className="w-full bg-[#0d1018] border border-white/10 rounded-lg p-3 text-sm"
+          rows={5}
+        />
+
+        <div className="flex gap-3 justify-end mt-4">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-[#1a1d25] rounded-lg border border-white/10"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => onSubmit({ message })}
+            className="px-4 py-2 bg-brightOrange text-deepBlue font-semibold rounded-lg"
+          >
+            Send Request
+          </button>
         </div>
       </div>
-
-      {/* HIRE MODAL */}
-      {showHire && (
-        <HireArtisanModal
-          artisan={artisan}
-          onClose={() => setShowHire(false)}
-          onSubmit={submitHire}
-        />
-      )}
-
-      {/* WRITE REVIEW MODAL */}
-      {showReview && (
-        <WriteReviewModal
-          artisanId={id}
-          artisan={artisan}
-          onClose={() => setShowReview(false)}
-          onSuccess={fetchProfile}
-        />
-      )}
     </div>
   );
 }

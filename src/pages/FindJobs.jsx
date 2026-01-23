@@ -1,178 +1,135 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { MapPin, Search, ArrowRight } from "lucide-react";
-import JobStats from "../components/JobStats";
+import mockInternalJobs from "../mocks/mockInternalJobs";
+import JobDetailsModal from "../components/JobDetailsModal";
+import { Search, MapPin, ArrowRight } from "lucide-react";
+import BackButton from "../components/BackButton";
 
 export default function FindJobs() {
   const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-  // Filters
   const [search, setSearch] = useState("");
-  const [location, setLocation] = useState("");
-  const [jobType, setJobType] = useState("");
-  const [skillLevel, setSkillLevel] = useState("");
+  const [type, setType] = useState("");
+  const [state, setState] = useState("");
+  const [selectedJob, setSelectedJob] = useState(null); // <-- Modal state
 
-  const baseURL = process.env.REACT_APP_API_BASE || "http://127.0.0.1:8000/api";
-
-  // -------------------------
-  // LOAD JOBS
-  // -------------------------
+  // Load mock jobs
   useEffect(() => {
-    fetchJobs();
+    setJobs(mockInternalJobs);
   }, []);
 
-  const fetchJobs = async () => {
-    try {
-      setLoading(true);
-      const resp = await axios.get(`${baseURL}/jobs-sync/`);
-      setJobs(resp.data.results || []);
-    } catch (err) {
-      console.error("Error fetching jobs:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // -------------------------
-  // FILTER LOGIC
-  // -------------------------
-  const filteredJobs = jobs.filter((job) => {
+  // Filters
+  const filtered = jobs.filter((job) => {
     const matchSearch =
-      job.title.toLowerCase().includes(search.toLowerCase()) ||
+      job.role.toLowerCase().includes(search.toLowerCase()) ||
       job.company.toLowerCase().includes(search.toLowerCase());
 
-    const matchLocation = location
-      ? job.location?.toLowerCase().includes(location.toLowerCase())
-      : true;
+    const matchType = type ? job.type === type : true;
+    const matchState = state ? job.state === state : true;
 
-    const matchType = jobType
-      ? job.source.toLowerCase().includes(jobType.toLowerCase())
-      : true;
-
-    const matchSkill = skillLevel
-      ? job.description?.toLowerCase().includes(skillLevel.toLowerCase())
-      : true;
-
-    return matchSearch && matchLocation && matchType && matchSkill;
+    return matchSearch && matchType && matchState;
   });
 
-  // -------------------------
-  // RENDER UI
-  // -------------------------
-  return (
-    <div className="min-h-screen bg-deepBlue text-white px-6 py-10 font-sans">
-      <div className="max-w-5xl mx-auto">
+return (
+  <div className="min-h-screen bg-[#0d1018] text-white px-6 py-10">
+    <div className="max-w-5xl mx-auto">
+      
+      <BackButton />
 
-        {/* JOB SYNC STATS */}
-        <JobStats />
+      <h1 className="text-3xl font-bold mb-6 text-center text-brightOrange">
+        Job Opportunities
+      </h1>
 
-        {/* PAGE TITLE */}
-        <h1 className="text-3xl font-bold text-center text-orange-400 mb-8">
-          Available Jobs
-        </h1>
+      {/* FILTER BAR */}
+      <div className="bg-[#111827] border border-white/10 rounded-xl p-5 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-        {/* FILTER BAR */}
-        <div className="bg-[#0d1a45] p-5 rounded-2xl shadow-md mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-
-            {/* SEARCH */}
-            <div className="flex items-center bg-[#101d4f] rounded-lg px-3">
-              <Search size={18} className="text-gray-400 mr-2" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search job title or company..."
-                className="bg-transparent w-full outline-none text-sm text-white placeholder-gray-400"
-              />
-            </div>
-
-            {/* LOCATION */}
+          {/* Search */}
+          <div className="flex items-center bg-[#1a1d25] rounded-lg px-3">
+            <Search size={18} className="text-gray-400 mr-2" />
             <input
               type="text"
-              placeholder="Location"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              className="bg-[#101d4f] text-sm text-white px-3 py-2 rounded-lg outline-none"
+              placeholder="Search role or company..."
+              className="bg-transparent flex-1 text-sm outline-none text-white placeholder-gray-500"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
-
-            {/* JOB SOURCE */}
-            <select
-              value={jobType}
-              onChange={(e) => setJobType(e.target.value)}
-              className="bg-[#101d4f] text-sm text-white px-3 py-2 rounded-lg outline-none"
-            >
-              <option value="">Job Source</option>
-              <option value="Google">Google Jobs</option>
-              <option value="Jobberman">Jobberman</option>
-              <option value="Indeed">Indeed</option>
-            </select>
-
-            {/* SKILL LEVEL */}
-            <select
-              value={skillLevel}
-              onChange={(e) => setSkillLevel(e.target.value)}
-              className="bg-[#101d4f] text-sm text-white px-3 py-2 rounded-lg outline-none"
-            >
-              <option value="">Skill Level</option>
-              <option value="junior">Junior</option>
-              <option value="mid">Mid-Level</option>
-              <option value="senior">Senior</option>
-            </select>
-
           </div>
+
+          {/* Job Type */}
+          <select
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+            className="bg-[#1f2937] p-3 rounded-lg border border-white/10 outline-none"
+          >
+            <option value="">All Types</option>
+            <option value="Full-time">Full-time</option>
+            <option value="Remote">Remote</option>
+            <option value="Part-time">Part-time</option>
+          </select>
+
+          {/* State */}
+          <select
+            value={state}
+            onChange={(e) => setState(e.target.value)}
+            className="bg-[#1f2937] p-3 rounded-lg border border-white/10 outline-none"
+          >
+            <option value="">All States</option>
+            <option value="Lagos">Lagos</option>
+            <option value="Abuja">Abuja</option>
+            <option value="Port Harcourt">Port Harcourt</option>
+          </select>
         </div>
-
+      </div>
         {/* JOB LIST */}
-        {loading ? (
-          <div className="text-center text-gray-400 mt-10">Loading jobs...</div>
-        ) : filteredJobs.length === 0 ? (
-          <div className="text-center text-gray-400 mt-10">
-            No jobs found. Try adjusting your filters.
-          </div>
+        {filtered.length === 0 ? (
+          <div className="text-center text-white/60 mt-10">No jobs found.</div>
         ) : (
-          <div className="grid gap-5 md:grid-cols-2">
-            {filteredJobs.map((job, idx) => (
+          <div className="grid md:grid-cols-2 gap-5">
+            {filtered.map((job) => (
               <div
-                key={idx}
-                className="bg-[#101d4f] border border-white/10 rounded-2xl p-5 shadow-md hover:shadow-lg transition"
+                key={job.id}
+                className="bg-[#111827] border border-white/10 rounded-xl p-5 hover:border-brightOrange transition"
               >
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-lg font-semibold text-white">{job.title}</h3>
-                  <span className="text-orange-400 text-xs uppercase">{job.source}</span>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-semibold text-white">{job.role}</h3>
+                  <span className="text-xs px-2 py-1 rounded-md bg-brightOrange text-deepBlue">
+                    {job.type}
+                  </span>
                 </div>
 
-                <p className="text-sm text-gray-300">{job.company}</p>
+                <p className="text-white/70 text-sm">{job.company}</p>
 
-                <p className="text-xs text-gray-400 flex items-center mt-1">
-                  <MapPin size={12} className="mr-1" /> {job.location || "Location not specified"}
-                </p>
+                <div className="flex items-center text-white/60 text-xs mt-2">
+                  <MapPin size={12} className="mr-1" /> {job.city}, {job.state}
+                </div>
 
-                <p className="text-sm text-gray-400 mt-3 line-clamp-2">
+                <div className="text-brightOrange font-semibold mt-3">
+                  {job.salary}
+                </div>
+
+                <p className="text-white/50 text-sm mt-2 line-clamp-2">
                   {job.description}
                 </p>
 
-                <div className="flex justify-between items-center mt-4">
-                  <a
-                    href={job.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md transition"
+                <div className="flex justify-end mt-4">
+                  <button
+                    onClick={() => setSelectedJob(job)}
+                    className="text-sm text-blue-400 flex items-center hover:text-blue-300"
                   >
-                    Apply Now
-                  </a>
-
-                  <button className="text-sm text-blue-400 flex items-center hover:text-blue-500">
-                    Save <ArrowRight size={14} className="ml-1" />
+                    View Details <ArrowRight size={14} className="ml-1" />
                   </button>
                 </div>
-
               </div>
             ))}
           </div>
         )}
 
+        {/* JOB DETAILS MODAL */}
+        {selectedJob && (
+          <JobDetailsModal
+            job={selectedJob}
+            onClose={() => setSelectedJob(null)}
+          />
+        )}
       </div>
     </div>
   );

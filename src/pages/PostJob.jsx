@@ -1,15 +1,11 @@
 import React, { useState } from "react";
-import axios from "axios";
-import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
-const api = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE || "http://127.0.0.1:8000/api/",
-  headers: { "Content-Type": "application/json" },
-});
+import BackButton from "../components/BackButton";
+import api from "../api/api"; // <-- use our existing axios instance
 
 export default function PostJob() {
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     company_name: "",
     company_address: "",
@@ -25,10 +21,21 @@ export default function PostJob() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  const categories = ["Autos", "Finance", "Farming", "Logistics", "Technology", "Construction", "Healthcare"];
+  const categories = [
+    "Autos",
+    "Finance",
+    "Farming",
+    "Logistics",
+    "Technology",
+    "Construction",
+    "Healthcare",
+  ];
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -36,27 +43,33 @@ export default function PostJob() {
     setLoading(true);
     setError("");
     setMessage("");
+
     try {
-      const token = localStorage.getItem("token");
-      await api.post("jobs/create/", formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setMessage("✅ Job posted successfully!");
-      setTimeout(() => navigate("/choice"), 1500);
+      const token = localStorage.getItem("access"); // <-- correct token
+      await api.post(
+        "jobs/create/",
+        formData,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setMessage("Job posted successfully!");
+      setTimeout(() => navigate("/dashboard"), 1200);
     } catch (err) {
       setError(err?.response?.data?.message || "Job posting failed.");
     }
+
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-[#0A1F44] text-white flex flex-col items-center py-10 px-6">
-      <div className="w-full max-w-2xl bg-[#0d0f14] rounded-xl p-8 shadow-lg relative">
-        <button onClick={() => navigate("/choice")} className="absolute top-4 left-4 text-gray-400 hover:text-white">
-          <ArrowLeft size={24} />
-        </button>
+    <div className="min-h-screen bg-[#0d1018] text-white px-6 py-10">
+      <div className="max-w-2xl mx-auto bg-[#111827] p-8 rounded-xl border border-white/10">
+        
+        <BackButton />
 
-        <h2 className="text-2xl font-bold text-center mb-6 text-brightOrange">Post a Job</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center text-brightOrange">
+          Post a Job
+        </h2>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input
@@ -65,7 +78,7 @@ export default function PostJob() {
             onChange={handleChange}
             placeholder="Company Name"
             required
-            className="p-3 rounded-md bg-[#0A1F44] border border-gray-600 focus:outline-none focus:border-brightOrange"
+            className="p-3 rounded-md bg-[#1f2937] border border-white/10 outline-none"
           />
 
           <input
@@ -74,7 +87,7 @@ export default function PostJob() {
             onChange={handleChange}
             placeholder="Company Address"
             required
-            className="p-3 rounded-md bg-[#0A1F44] border border-gray-600 focus:outline-none focus:border-brightOrange"
+            className="p-3 rounded-md bg-[#1f2937] border border-white/10 outline-none"
           />
 
           <select
@@ -82,7 +95,7 @@ export default function PostJob() {
             value={formData.category}
             onChange={handleChange}
             required
-            className="p-3 rounded-md bg-[#0A1F44] border border-gray-600 text-white"
+            className="p-3 rounded-md bg-[#1f2937] border border-white/10 outline-none"
           >
             <option value="">Select Category</option>
             {categories.map((cat) => (
@@ -98,14 +111,14 @@ export default function PostJob() {
             onChange={handleChange}
             placeholder="Job Role / Specialization"
             required
-            className="p-3 rounded-md bg-[#0A1F44] border border-gray-600 focus:outline-none focus:border-brightOrange"
+            className="p-3 rounded-md bg-[#1f2937] border border-white/10 outline-none"
           />
 
           <select
             name="job_type"
             value={formData.job_type}
             onChange={handleChange}
-            className="p-3 rounded-md bg-[#0A1F44] border border-gray-600 text-white"
+            className="p-3 rounded-md bg-[#1f2937] border border-white/10 outline-none"
           >
             <option value="Full-Time">Full-Time</option>
             <option value="Part-Time">Part-Time</option>
@@ -117,7 +130,7 @@ export default function PostJob() {
             value={formData.salary_range}
             onChange={handleChange}
             placeholder="Salary Range (₦ e.g., 150000 - 250000)"
-            className="p-3 rounded-md bg-[#0A1F44] border border-gray-600 focus:outline-none focus:border-brightOrange"
+            className="p-3 rounded-md bg-[#1f2937] border border-white/10 outline-none"
           />
 
           <textarea
@@ -126,10 +139,10 @@ export default function PostJob() {
             onChange={handleChange}
             placeholder="Job Description"
             rows={4}
-            className="p-3 rounded-md bg-[#0A1F44] border border-gray-600 focus:outline-none focus:border-brightOrange"
+            className="p-3 rounded-md bg-[#1f2937] border border-white/10 outline-none"
           />
 
-          <div className="flex gap-4 mt-2">
+          <div className="flex flex-col gap-2 mt-2 text-sm">
             <label className="flex items-center gap-2">
               <input
                 type="radio"
@@ -138,8 +151,9 @@ export default function PostJob() {
                 checked={formData.plan_type === "basic"}
                 onChange={handleChange}
               />
-              Basic (₦0 — visible for 24hrs)
+              <span>Basic (₦0 — visible for 24hrs)</span>
             </label>
+
             <label className="flex items-center gap-2">
               <input
                 type="radio"
@@ -148,7 +162,7 @@ export default function PostJob() {
                 checked={formData.plan_type === "premium"}
                 onChange={handleChange}
               />
-              Premium (₦1,000 — visible for 7 days)
+              <span>Premium (₦1,000 — visible for 7 days)</span>
             </label>
           </div>
 
@@ -158,7 +172,7 @@ export default function PostJob() {
           <button
             type="submit"
             disabled={loading}
-            className="mt-3 bg-brightOrange text-deepBlue font-bold py-3 rounded-md hover:bg-orange-400 transition-all duration-300"
+            className="mt-3 bg-brightOrange text-deepBlue font-bold py-3 rounded-md disabled:opacity-50"
           >
             {loading ? "Posting..." : "Post Job"}
           </button>

@@ -1,43 +1,54 @@
 import React, { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
+import StatusModal from "../components/StatusModal";
 
 export default function WithdrawSavings() {
-  const { id } = useParams();
+  const { id } = useParams(); // savings_id
   const navigate = useNavigate();
 
   const [savings, setSavings] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [earlyBreak, setEarlyBreak] = useState(false);
+  const [error, setError] = useState("");
 
-  const [step, setStep] = useState(1);        // 1 = Enter amount, 2 = Enter OTP
-  const [amount, setAmount] = useState("");
-  const [otp, setOtp] = useState("");
-  const [message, setMessage] = useState("");
+  const [modal, setModal] = useState({
+    open: false,
+    type: "success",
+    title: "",
+    message: "",
+  });
 
   const BASE_URL =
     process.env.REACT_APP_API_BASE || "http://127.0.0.1:8000/api";
 
-  // -----------------------------
-  // LOAD SAVINGS
-  // -----------------------------
+  // ---------------------------------
+  // LOAD SAVINGS RECORD
+  // ---------------------------------
   const loadSavings = async () => {
     try {
-      setLoading(true);
       const token = localStorage.getItem("token");
 
-      const res = await fetch(`${BASE_URL}/savings/me/`, {
+      const res = await fetch(`${BASE_URL}/savings/${id}/`, {
         headers: {
-          "Content-Type": "application/json",
           Authorization: token ? `Bearer ${token}` : "",
         },
       });
 
       const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.detail || "Unable to load savings record.");
+        return;
+      }
+
       setSavings(data);
     } catch {
-      setMessage("Failed to load savings.");
+      setError("Network error while loading savings.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -60,182 +71,122 @@ export default function WithdrawSavings() {
     );
   }
 
-  const isLocked = new Date(savings.locked_until) > new Date();
+  const isLocked = savings.status === "locked";
 
-  // -----------------------------
-  // STEP 1: SEND OTP
-  // -----------------------------
-  const sendOTP = async () => {
-    setMessage("");
-
-    if (isLocked) {
-      setMessage(
-        `Savings is still locked until ${new Date(
-          savings.locked_until
-        ).toDateString()}`
-      );
-      return;
-    }
-
-    if (!amount || Number(amount) <= 0) {
-      setMessage("Enter a valid withdrawal amount.");
-      return;
-    }
-
-    if (Number(amount) > Number(savings.amount)) {
-      setMessage("Withdrawal amount exceeds available balance.");
-      return;
-    }
+  // ---------------------------------
+  // WITHDRAW
+  // ---------------------------------
+  const withdraw = async () => {
+    setError("");
+    setSubmitting(true);
 
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch(`${BASE_URL}/savings/otp/`, {
+      const res = await fetch(`${BASE_URL}/savings/${id}/withdraw/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: token ? `Bearer ${token}` : "",
         },
         body: JSON.stringify({
-          savings_id: savings.id,
+          early_break: earlyBreak,
         }),
       });
 
       const data = await res.json();
+      setSubmitting(false);
 
-      if (res.ok) {
-        setStep(2); // Move to OTP screen
-        setMessage("OTP sent. Check your email.");
-      } else {
-        setMessage(data.error || "OTP request failed.");
+      if (!res.ok) {
+        setError(data.detail || "Unable to withdraw savings.");
+        return;
       }
-    } catch {
-      setMessage("Network error.");
-    }
-  };
 
-  // -----------------------------
-  // STEP 2: VERIFY OTP & WITHDRAW
-  // -----------------------------
-  const verifyAndWithdraw = async () => {
-    setMessage("");
-
-    if (!otp || otp.length !== 6) {
-      setMessage("Enter a valid 6-digit OTP.");
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem("token");
-
-      const res = await fetch(`${BASE_URL}/savings/withdraw/${savings.id}/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token ? `Bearer ${token}` : "",
-        },
-        body: JSON.stringify({
-          otp: otp,
-        }),
+      setModal({
+        open: true,
+        type: "success",
+        title: "Withdrawal Successful",
+        message:
+          earlyBreak && isLocked
+            ? "Your savings was withdrawn early with a penalty applied."
+            : "Your savings has been credited to your wallet.",
       });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        alert("Withdrawal successful!");
-        navigate("/savings");
-      } else {
-        setMessage(data.error || "OTP verification failed.");
-      }
     } catch {
-      setMessage("Network error.");
+      setSubmitting(false);
+      setError("Network error.");
     }
   };
 
-  // -----------------------------
+  // ---------------------------------
   // UI
-  // -----------------------------
+  // ---------------------------------
   return (
     <div className="min-h-screen bg-deepBlue text-white px-6 py-10">
-
-      {/* BACK BUTTON */}
       <button
         onClick={() => navigate(-1)}
         className="flex items-center gap-2 text-white/70 hover:text-white mb-8"
       >
         <ArrowLeft size={22} />
-        <span>Back</span>
+        Back
       </button>
 
       <h1 className="text-3xl font-bold mb-2">Withdraw Savings</h1>
-      <p className="text-white/60 mb-10">Secure withdrawal using OTP</p>
+      <p className="text-white/60 mb-8">
+        Withdraw to your wallet securely
+      </p>
 
-      {message && <p className="text-red-400 mb-6">{message}</p>}
+      {error && <p className="text-red-400 mb-6">{error}</p>}
 
-      {/* BOX */}
-      <div className="bg-[#111827] p-6 rounded-xl border border-white/10 shadow-md">
-
-        <h2 className="text-xl font-semibold mb-3">Balance</h2>
+      <div className="bg-[#111827] p-6 rounded-xl border border-white/10">
+        <h2 className="text-xl font-semibold mb-2">Balance</h2>
         <p className="text-3xl font-bold text-brightOrange mb-6">
           ₦{Number(savings.amount).toLocaleString()}
         </p>
 
-        {/* STEP 1: ENTER AMOUNT */}
-        {step === 1 && (
-          <>
-            <label className="block mb-2 text-white/70">Withdrawal Amount</label>
-            <input
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              className="w-full bg-[#1f2937] text-white p-3 rounded-md outline-none mb-6"
-              placeholder="e.g. 6000"
-            />
-
-            <button
-              onClick={sendOTP}
-              disabled={isLocked}
-              className={`w-full py-3 rounded-lg font-bold ${
-                isLocked
-                  ? "bg-gray-600 text-gray-300"
-                  : "bg-brightOrange text-deepBlue hover:bg-orange-400"
-              }`}
-            >
-              Send OTP
-            </button>
-          </>
+        {isLocked && (
+          <div className="mb-5 text-sm text-yellow-400">
+            This savings is locked until{" "}
+            {new Date(savings.locked_until).toDateString()}.
+            <br />
+            You may withdraw early with a 10% penalty.
+          </div>
         )}
 
-        {/* STEP 2: ENTER OTP */}
-        {step === 2 && (
-          <>
-            <label className="block mb-2 text-white/70">Enter OTP</label>
+        {isLocked && (
+          <label className="flex items-center gap-2 mb-5">
             <input
-              type="text"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              maxLength={6}
-              className="w-full bg-[#1f2937] text-white p-3 rounded-md outline-none mb-6 tracking-widest text-center"
-              placeholder="6-digit code"
+              type="checkbox"
+              checked={earlyBreak}
+              onChange={(e) => setEarlyBreak(e.target.checked)}
             />
-
-            <button
-              onClick={verifyAndWithdraw}
-              className="w-full py-3 rounded-lg font-bold bg-brightOrange text-deepBlue hover:bg-orange-400"
-            >
-              Confirm Withdrawal
-            </button>
-
-            <button
-              onClick={sendOTP}
-              className="w-full py-3 mt-3 rounded-lg font-semibold text-white bg-[#1f2937] border border-white/20 hover:bg-[#2a3548]"
-            >
-              Resend OTP
-            </button>
-          </>
+            <span>Withdraw early (10% penalty)</span>
+          </label>
         )}
 
+        <button
+          onClick={withdraw}
+          disabled={submitting || (isLocked && !earlyBreak)}
+          className={`w-full py-3 rounded-lg font-bold ${
+            submitting
+              ? "bg-gray-600 text-gray-300"
+              : "bg-brightOrange text-deepBlue hover:bg-orange-400"
+          }`}
+        >
+          {submitting ? "Processing..." : "Withdraw"}
+        </button>
       </div>
+
+      {/* STATUS MODAL */}
+      <StatusModal
+        open={modal.open}
+        type={modal.type}
+        title={modal.title}
+        message={modal.message}
+        onClose={() => {
+          setModal({ ...modal, open: false });
+          navigate("/savings");
+        }}
+      />
     </div>
   );
 }

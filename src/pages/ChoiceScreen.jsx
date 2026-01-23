@@ -1,113 +1,89 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
 
 export default function ChoiceScreen() {
   const navigate = useNavigate();
 
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const firstName = user.full_name ? user.full_name.split(" ")[0] : "User";
+
   return (
-    <div className="min-h-screen bg-deepBlue text-white px-6 py-10">
+    <div className="min-h-screen bg-deepBlue text-white px-6 py-12 font-sans">
 
-      {/* BACK BUTTON */}
-      <button
-        onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-white/70 hover:text-white mb-8"
-      >
-        <ArrowLeft size={22} />
-        <span>Back</span>
-      </button>
+      {/* HEADER */}
+      <div className="text-center mb-12">
+        <h1 className="text-3xl md:text-4xl font-extrabold tracking-wide uppercase">
+          Welcome to Spectrum Arena, {firstName}
+        </h1>
+        <p className="mt-3 text-white/70 text-base md:text-lg">
+          What would you like to do today?
+        </p>
+      </div>
 
-      <h1 className="text-3xl font-bold mb-10 text-center">
-        What would you like to do today?
-      </h1>
+      {/* ACTION GRID */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-xl mx-auto">
+        {/* POST JOB */}
+        <button
+          onClick={() => navigate("/post-job")}
+          className="bg-[#111827] hover:bg-[#162033] rounded-xl p-6 border border-white/10 text-left"
+        >
+          <div className="text-brightOrange text-2xl mb-2">💼</div>
+          <h2 className="text-xl font-semibold text-brightOrange mb-1">
+            Post a Job
+          </h2>
+          <p className="text-white/70 text-sm">
+            Create & share new job openings easily.
+          </p>
+        </button>
 
         {/* FIND JOBS */}
         <button
           onClick={() => navigate("/find-jobs")}
-          className="bg-[#111827] hover:bg-[#162033] p-6 rounded-xl border border-white/10 transition"
+          className="bg-[#111827] hover:bg-[#162033] rounded-xl p-6 border border-white/10 text-left"
         >
-          <h2 className="text-xl font-semibold mb-2 text-brightOrange">Find Jobs</h2>
+          <div className="text-brightOrange text-2xl mb-2">🔍</div>
+          <h2 className="text-xl font-semibold text-brightOrange mb-1">
+            Find a Job
+          </h2>
           <p className="text-white/70 text-sm">
-            Browse available jobs from verified sources.
+            Discover job listings near your location.
           </p>
         </button>
 
         {/* FIND ARTISANS */}
         <button
           onClick={() => navigate("/find-artisans")}
-          className="bg-[#111827] hover:bg-[#162033] p-6 rounded-xl border border-white/10 transition"
+          className="bg-[#111827] hover:bg-[#162033] rounded-xl p-6 border border-white/10 text-left"
         >
-          <h2 className="text-xl font-semibold mb-2 text-brightOrange">Find Artisans</h2>
-          <p className="text-white/70 text-sm">
-            Discover artisans near you automatically.
-          </p>
-        </button>
-
-        {/* POST JOB */}
-        <button
-          onClick={() => navigate("/post-job")}
-          className="bg-[#111827] hover:bg-[#162033] p-6 rounded-xl border border-white/10 transition"
-        >
-          <h2 className="text-xl font-semibold mb-2 text-brightOrange">Post a Job</h2>
-          <p className="text-white/70 text-sm">Hire artisans for any task.</p>
-        </button>
-
-        {/* CREATE SAVINGS */}
-        <button
-          onClick={() => navigate("/savings/create")}
-          className="bg-[#111827] hover:bg-[#162033] p-6 rounded-xl border border-white/10 transition"
-        >
-          <h2 className="text-xl font-semibold mb-2 text-brightOrange">
-            Create Savings Plan
+          <div className="text-brightOrange text-2xl mb-2">🛠️</div>
+          <h2 className="text-xl font-semibold text-brightOrange mb-1">
+            Find Skilled Artisan
           </h2>
           <p className="text-white/70 text-sm">
-            Lock your funds & withdraw later.
+            Locate reliable artisans in your area.
           </p>
         </button>
 
-        {/* MY SAVINGS */}
+        {/* MANAGE UTILITIES */}
         <button
-          onClick={() => navigate("/savings")}
-          className="bg-[#111827] hover:bg-[#162033] p-6 rounded-xl border border-white/10 transition"
+          onClick={() => navigate("/bills")}
+          className="bg-[#111827] hover:bg-[#162033] rounded-xl p-6 border border-white/10 text-left"
         >
-          <h2 className="text-xl font-semibold mb-2 text-brightOrange">My Savings</h2>
-          <p className="text-white/70 text-sm">
-            Track your savings and goals.
-          </p>
-        </button>
-
-        {/* BUY AIRTIME */}
-        <button
-          onClick={() => navigate("/bills/airtime")}
-          className="bg-[#111827] hover:bg-[#162033] p-6 rounded-xl border border-white/10 transition"
-        >
-          <h2 className="text-xl font-semibold mb-2 text-brightOrange">Buy Airtime</h2>
-          <p className="text-white/70 text-sm">MTN, Glo, Airtel, 9mobile.</p>
-        </button>
-
-        {/* BUY DATA */}
-        <button
-          onClick={() => navigate("/bills/data")}
-          className="bg-[#111827] hover:bg-[#162033] p-6 rounded-xl border border-white/10 transition"
-        >
-          <h2 className="text-xl font-semibold mb-2 text-brightOrange">Buy Data</h2>
-          <p className="text-white/70 text-sm">Fast and secure data purchase.</p>
-        </button>
-
-        {/* PAY ELECTRICITY */}
-        <button
-          onClick={() => navigate("/bills/electricity")}
-          className="bg-[#111827] hover:bg-[#162033] p-6 rounded-xl border border-white/10 transition"
-        >
-          <h2 className="text-xl font-semibold mb-2 text-brightOrange">
-            Pay Electricity
+          <div className="text-brightOrange text-2xl mb-2">⚡</div>
+          <h2 className="text-xl font-semibold text-brightOrange mb-1">
+            Manage Utilities
           </h2>
           <p className="text-white/70 text-sm">
-            Pay NEPA prepaid/postpaid bills.
+            Pay bills, airtime, and data with ease.
           </p>
         </button>
+
+      </div>
+
+      {/* FOOTER (OPTIONAL) */}
+      <div className="mt-16 text-center text-white/40 text-sm">
+        Spectrum Arena © {new Date().getFullYear()}
       </div>
     </div>
   );
