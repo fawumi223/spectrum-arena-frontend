@@ -1,0 +1,13 @@
+[build]
+builder = "NIXPACKS"
+
+[build.args]
+CI = "false"
+
+[build.commands]
+install = "npm install"
+build = "npm run build"
+
+[deploy]
+start = "npx serve -s build"
+
