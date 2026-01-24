@@ -1,6 +1,10 @@
 { pkgs }: {
-  deps = [
-    pkgs.nodejs-20_x
+  packages = [
+    pkgs.nodejs_20
   ];
+  build = ''
+    npm install
+    npm run build
+  '';
 }
 
