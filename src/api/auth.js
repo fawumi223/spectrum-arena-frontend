@@ -1,6 +1,25 @@
 import api from "./api";
 
 /* ------------------------------------------------------------------
+   HELPERS
+------------------------------------------------------------------- */
+
+// Normalize phone input (prevents login mismatch later)
+const normalizePhone = (phone) => {
+  if (!phone) return phone;
+
+  let cleaned = phone.trim();
+
+  // convert +234XXXXXXXXXX → 0XXXXXXXXXX
+  if (cleaned.startsWith("+234")) {
+    cleaned = "0" + cleaned.slice(4);
+  }
+
+  return cleaned;
+};
+
+
+/* ------------------------------------------------------------------
    SIGNUP (DEMO MODE: auto-login via signup response)
 ------------------------------------------------------------------- */
 export const signupUser = async ({
@@ -11,10 +30,9 @@ export const signupUser = async ({
   email,
 }) => {
   try {
-    // Build payload cleanly (NO nulls, NO OTP fields)
     const payload = {
       full_name,
-      phone_number,
+      phone_number: normalizePhone(phone_number),
       password,
       role: role ? role.toUpperCase() : "CLIENT",
     };
@@ -24,22 +42,24 @@ export const signupUser = async ({
       payload.email = email.trim();
     }
 
-    // Signup (backend returns JWT directly in demo mode)
     const response = await api.post("/users/signup/", payload);
 
-    const { access, refresh, user } = response.data;
+    const data = response.data || {};
+    const access = data.access;
+    const refresh = data.refresh;
+    const user = data.user;
 
-    // Persist auth
-    localStorage.setItem("access", access);
-    localStorage.setItem("refresh", refresh);
-    localStorage.setItem("user", JSON.stringify(user));
+    if (access) localStorage.setItem("access", access);
+    if (refresh) localStorage.setItem("refresh", refresh);
+    if (user) localStorage.setItem("user", JSON.stringify(user));
 
-    return response.data;
+    return data;
   } catch (err) {
     console.error("Signup failed:", err?.response?.data || err.message);
     throw err;
   }
 };
+
 
 /* ------------------------------------------------------------------
    LOGIN
@@ -47,17 +67,20 @@ export const signupUser = async ({
 export const loginUser = async ({ phone_number, password }) => {
   try {
     const response = await api.post("/users/login/", {
-      phone_number,
+      phone_number: normalizePhone(phone_number),
       password,
     });
 
-    const { access, refresh, user } = response.data;
+    const data = response.data || {};
+    const access = data.access;
+    const refresh = data.refresh;
+    const user = data.user;
 
-    localStorage.setItem("access", access);
-    localStorage.setItem("refresh", refresh);
-    localStorage.setItem("user", JSON.stringify(user));
+    if (access) localStorage.setItem("access", access);
+    if (refresh) localStorage.setItem("refresh", refresh);
+    if (user) localStorage.setItem("user", JSON.stringify(user));
 
-    return response.data;
+    return data;
   } catch (err) {
     console.error("Login failed:", err?.response?.data || err.message);
     throw err;

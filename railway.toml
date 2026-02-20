@@ -1,9 +1,6 @@
 [build]
 builder = "NIXPACKS"
 
-[build.environment]
-NODE_VERSION = "20"
-
 [deploy]
 start = "npx serve -s build"
 

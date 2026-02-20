@@ -85,25 +85,38 @@ function RoleRouter() {
 --------------------------------------------------- */
 function Navbar({ onOpenSignup, onOpenLogin }) {
   const navigate = useNavigate();
-  useLocation();
+  const location = useLocation();
 
   const stored = localStorage.getItem("user");
   const user = stored ? JSON.parse(stored) : null;
   const firstName = user?.full_name?.split(" ")[0];
 
-  const handleProtectedNav = (path) => {
-    if (!isAuthenticated()) return onOpenLogin();
-    navigate(path);
-  };
+  const isLandingPage = location.pathname === "/";
 
   return (
     <nav className="w-full bg-deepBlue text-white py-5 px-6 flex justify-between">
       <span className="font-semibold text-xl">Spectrum Arena</span>
 
-      {!isAuthenticated() ? (
+      {/* LANDING PAGE NAVBAR (always public) */}
+      {isLandingPage ? (
         <div className="flex gap-3">
           <button onClick={onOpenLogin}>Log in</button>
-          <button onClick={onOpenSignup} className="bg-brightOrange px-4 py-2 rounded">
+          <button
+            onClick={onOpenSignup}
+            className="bg-brightOrange px-4 py-2 rounded"
+          >
+            Get Started
+          </button>
+        </div>
+
+      /* OTHER PAGES (auth-aware) */
+      ) : !isAuthenticated() ? (
+        <div className="flex gap-3">
+          <button onClick={onOpenLogin}>Log in</button>
+          <button
+            onClick={onOpenSignup}
+            className="bg-brightOrange px-4 py-2 rounded"
+          >
             Get Started
           </button>
         </div>
@@ -127,7 +140,7 @@ function Navbar({ onOpenSignup, onOpenLogin }) {
 }
 
 /* ---------------------------------------------------
-   Signup Modal (DEMO MODE — NO OTP)
+   Signup Modal
 --------------------------------------------------- */
 function SignupModal({ onClose }) {
   const [full_name, setFullName] = useState("");
@@ -166,17 +179,47 @@ function SignupModal({ onClose }) {
         <h4 className="text-center font-bold mb-4">Create account</h4>
 
         <form onSubmit={submit} className="flex flex-col gap-3">
-          <input placeholder="Full name" required value={full_name} onChange={(e) => setFullName(e.target.value)} />
-          <input placeholder="Phone number" required value={phone_number} onChange={(e) => setPhone(e.target.value)} />
-          <input placeholder="Email (optional)" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <input
+            className="bg-gray-200 text-black px-3 py-2 rounded"
+            placeholder="Full name"
+            required
+            value={full_name}
+            onChange={(e) => setFullName(e.target.value)}
+          />
 
-          <select value={role} onChange={(e) => setRole(e.target.value)}>
+          <input
+            className="bg-gray-200 text-black px-3 py-2 rounded"
+            placeholder="Phone number"
+            required
+            value={phone_number}
+            onChange={(e) => setPhone(e.target.value)}
+          />
+
+          <input
+            className="bg-gray-200 text-black px-3 py-2 rounded"
+            placeholder="Email (optional)"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+
+          <select
+            className="bg-gray-200 text-black px-3 py-2 rounded"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+          >
             <option value="client">Client</option>
             <option value="artisan">Artisan</option>
             <option value="company">Company</option>
           </select>
 
-          <input type="password" placeholder="Password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+          <input
+            type="password"
+            className="bg-gray-200 text-black px-3 py-2 rounded"
+            placeholder="Password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
           <button type="submit" className="bg-brightOrange p-3 rounded">
             Sign up
@@ -194,14 +237,12 @@ function LoginModal({ onClose }) {
   const [phone_number, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const location = useLocation();
-  const from = location.state?.from?.pathname || "/dashboard";
 
   async function submit(e) {
     e.preventDefault();
     try {
       await loginUser({ phone_number, password });
-      navigate(from, { replace: true });
+      navigate("/dashboard", { replace: true });
       onClose();
     } catch {
       alert("Login failed");
@@ -218,8 +259,21 @@ function LoginModal({ onClose }) {
         <h4 className="text-center font-bold mb-4">Log in</h4>
 
         <form onSubmit={submit} className="flex flex-col gap-3">
-          <input placeholder="Phone number" value={phone_number} onChange={(e) => setPhone(e.target.value)} />
-          <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+          <input
+            className="bg-gray-200 text-black px-3 py-2 rounded"
+            placeholder="Phone number"
+            value={phone_number}
+            onChange={(e) => setPhone(e.target.value)}
+          />
+
+          <input
+            type="password"
+            className="bg-gray-200 text-black px-3 py-2 rounded"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
           <button type="submit" className="bg-brightOrange p-3 rounded">
             Log in
           </button>
@@ -257,7 +311,11 @@ export default function App() {
       <Toaster position="top-center" />
       <Router>
         <Routes>
-          <Route path="/" element={isAuthenticated() ? <Navigate to="/dashboard" replace /> : <LandingPage />} />
+
+          {/* Landing ALWAYS loads first */}
+          <Route path="/" element={<LandingPage />} />
+
+          {/* Protected routes */}
           <Route path="/dashboard" element={<RequireAuth><RoleRouter /></RequireAuth>} />
           <Route path="/notifications" element={<RequireAuth><Notifications /></RequireAuth>} />
           <Route path="/profile/artisan/:id" element={<RequireAuth><ArtisanProfile /></RequireAuth>} />
@@ -272,6 +330,7 @@ export default function App() {
           <Route path="/bills/electricity" element={<RequireAuth><Electricity /></RequireAuth>} />
           <Route path="/analytics" element={<RequireAuth><Analytics /></RequireAuth>} />
           <Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} />
+
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
