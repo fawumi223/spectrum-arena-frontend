@@ -1,16 +1,10 @@
 import axios from "axios";
 
-// Development backend
-const DEV_BASE = "http://127.0.0.1:8000/api/";
-
-// Production backend
-const PROD_BASE = "https://web-production-bc7396.up.railway.app/api/";
-
-// Auto-select base URL
-const BASE = process.env.NODE_ENV === "development" ? DEV_BASE : PROD_BASE;
+// Always use environment variable (works for dev + production)
+const BASE = process.env.REACT_APP_API_BASE_URL;
 
 const api = axios.create({
-  baseURL: BASE,
+  baseURL: `${BASE}/api/`,
   headers: {
     "Content-Type": "application/json",
   },
@@ -23,7 +17,6 @@ api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("access");
 
-    // Do NOT attach token to auth endpoints
     if (
       token &&
       !config.url.includes("/users/login") &&
@@ -47,35 +40,31 @@ api.interceptors.response.use(
     const status = error?.response?.status;
     const originalRequest = error.config;
 
-    // Only attempt refresh once
     if (status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       const refresh = localStorage.getItem("refresh");
 
       if (!refresh) {
-        // logout → go to landing page
         localStorage.clear();
         window.location.href = "/";
         return Promise.reject(error);
       }
 
       try {
-        const refreshRes = await axios.post(`${BASE}token/refresh/`, {
-          refresh,
-        });
+        const refreshRes = await axios.post(
+          `${BASE}/api/token/refresh/`,
+          { refresh }
+        );
 
         const newAccess = refreshRes.data.access;
 
-        // Save new access token
         localStorage.setItem("access", newAccess);
 
-        // Retry original request with new token
         originalRequest.headers.Authorization = `Bearer ${newAccess}`;
         return api(originalRequest);
 
       } catch (refreshErr) {
-        // Refresh failed → full logout
         localStorage.clear();
         window.location.href = "/";
         return Promise.reject(refreshErr);
@@ -87,4 +76,3 @@ api.interceptors.response.use(
 );
 
 export default api;
-
