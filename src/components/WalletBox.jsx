@@ -6,6 +6,10 @@ export default function WalletBox() {
   const [loading, setLoading] = useState(false);
   const [wallet, setWallet] = useState(null);
 
+  useEffect(() => {
+    loadWallet();
+  }, []);
+
   async function loadWallet() {
     try {
       const data = await getWallet();
@@ -18,7 +22,7 @@ export default function WalletBox() {
   async function activateAccount() {
     setLoading(true);
     try {
-      const data = await initNuban();
+      await initNuban();
       toast.success("Virtual account activation in progress!");
       await loadWallet();
     } catch (err) {
@@ -27,10 +31,6 @@ export default function WalletBox() {
       setLoading(false);
     }
   }
-
-  useEffect(() => {
-    loadWallet();
-  }, []);
 
   return (
     <div className="bg-[#101725] text-white p-5 rounded-xl w-full max-w-lg">
@@ -74,4 +74,3 @@ export default function WalletBox() {
     </div>
   );
 }
-
