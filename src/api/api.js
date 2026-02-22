@@ -1,10 +1,21 @@
 import axios from "axios";
 
-// Always use environment variable (works for dev + production)
-const BASE = process.env.REACT_APP_API_BASE_URL;
+// Development backend
+const DEV_BASE = "http://127.0.0.1:8000/api/";
+
+// Production backend from Vercel ENV
+const PROD_BASE = process.env.REACT_APP_API_BASE_URL
+  ? `${process.env.REACT_APP_API_BASE_URL}/api/`
+  : "";
+
+// Auto-select base URL
+const BASE =
+  process.env.NODE_ENV === "development"
+    ? DEV_BASE
+    : PROD_BASE;
 
 const api = axios.create({
-  baseURL: `${BASE}/api/`,
+  baseURL: BASE,
   headers: {
     "Content-Type": "application/json",
   },
@@ -52,10 +63,9 @@ api.interceptors.response.use(
       }
 
       try {
-        const refreshRes = await axios.post(
-          `${BASE}/api/token/refresh/`,
-          { refresh }
-        );
+        const refreshRes = await axios.post(`${BASE}token/refresh/`, {
+          refresh,
+        });
 
         const newAccess = refreshRes.data.access;
 
