@@ -25,6 +25,7 @@ import PostJob from "./pages/PostJob";
 import Airtime from "./pages/Airtime";
 import Data from "./pages/Data";
 import Electricity from "./pages/Electricity";
+import Services from "./pages/Services";
 import ArtisanProfile from "./pages/ArtisanProfile";
 import CompanyApplications from "./pages/CompanyApplications";
 import JobDetail from "./pages/JobDetail";
@@ -612,6 +613,7 @@ export default function App() {
           <Route path="/bills/airtime" element={<RequireAuth><Airtime /></RequireAuth>} />
           <Route path="/bills/data" element={<RequireAuth><Data /></RequireAuth>} />
           <Route path="/bills/electricity" element={<RequireAuth><Electricity /></RequireAuth>} />
+          <Route path="/services" element={<RequireAuth><Services /></RequireAuth>} />
           <Route path="/analytics" element={<RequireAuth><Analytics /></RequireAuth>} />
           <Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} />
 

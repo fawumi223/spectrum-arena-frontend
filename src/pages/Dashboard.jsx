@@ -74,15 +74,67 @@ export default function Dashboard() {
       <h2 className="text-lg font-semibold mb-3 mt-10">Services</h2>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-10">
-        <Tile label="Find Jobs" icon={<Briefcase size={22} />} onClick={() => navigate("/find-jobs")} />
-        <Tile label="Find Artisans" icon={<Search size={22} />} onClick={() => navigate("/find-artisans")} />
-        <Tile label="Post a Job" icon={<PlusCircle size={22} />} onClick={() => navigate("/post-job")} />
-        <Tile label="Savings" icon={<PiggyBank size={22} />} onClick={() => navigate("/savings")} />
-        <Tile label="Buy Airtime" icon={<Smartphone size={22} />} onClick={() => navigate("/bills/airtime")} />
-        <Tile label="Buy Data" icon={<Wifi size={22} />} onClick={() => navigate("/bills/data")} />
-        <Tile label="Electricity" icon={<BatteryCharging size={22} />} onClick={() => navigate("/bills/electricity")} />
-        <Tile label="Analytics" icon={<BarChart2 size={22} />} onClick={() => navigate("/analytics")} />
-        <Tile label="Settings" icon={<Settings size={22} />} onClick={() => navigate("/settings")} />
+
+        <Tile
+          label="Services"
+          icon={<Smartphone size={22} />}
+          onClick={() => navigate("/services")}
+        />
+
+        <Tile
+          label="Find Jobs"
+          icon={<Briefcase size={22} />}
+          onClick={() => navigate("/find-jobs")}
+        />
+
+        <Tile
+          label="Find Artisans"
+          icon={<Search size={22} />}
+          onClick={() => navigate("/find-artisans")}
+        />
+
+        <Tile
+          label="Post a Job"
+          icon={<PlusCircle size={22} />}
+          onClick={() => navigate("/post-job")}
+        />
+
+        <Tile
+          label="Savings"
+          icon={<PiggyBank size={22} />}
+          onClick={() => navigate("/savings")}
+        />
+
+        <Tile
+          label="Buy Airtime"
+          icon={<Smartphone size={22} />}
+          onClick={() => navigate("/bills/airtime")}
+        />
+
+        <Tile
+          label="Buy Data"
+          icon={<Wifi size={22} />}
+          onClick={() => navigate("/bills/data")}
+        />
+
+        <Tile
+          label="Electricity"
+          icon={<BatteryCharging size={22} />}
+          onClick={() => navigate("/bills/electricity")}
+        />
+
+        <Tile
+          label="Analytics"
+          icon={<BarChart2 size={22} />}
+          onClick={() => navigate("/analytics")}
+        />
+
+        <Tile
+          label="Settings"
+          icon={<Settings size={22} />}
+          onClick={() => navigate("/settings")}
+        />
+
       </div>
 
       {/* RECENT ACTIVITY */}
