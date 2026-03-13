@@ -1,3 +1,4 @@
+```javascript
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -24,7 +25,7 @@ export default function Dashboard() {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const firstName = user.full_name ? user.full_name.split(" ")[0] : "User";
 
-  const [filters, setFilters] = useState(null);
+  const [filters] = useState(null);
 
   const mockSavings = "₦0.00";
   const mockJobsPosted = 0;
@@ -210,14 +211,14 @@ function Tile({ label, icon, onClick }) {
 function Activity({ title, description, amount }) {
   return (
     <div className="flex justify-between items-center border-b border-white/5 pb-2">
-
       <div>
         <div className="text-sm font-medium">{title}</div>
         <div className="text-xs text-white/50">{description}</div>
       </div>
 
       <div className="text-sm font-semibold">{amount}</div>
-
     </div>
   );
 }
+```
+
