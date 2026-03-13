@@ -33,36 +33,52 @@ export default function WalletBox() {
   }
 
   return (
-    <div className="bg-[#101725] text-white p-5 rounded-xl w-full max-w-lg">
+    <div className="bg-[#101725] text-white p-6 rounded-xl w-full max-w-lg">
+
       <h3 className="text-lg font-semibold mb-3">Wallet</h3>
 
       {wallet ? (
         <>
           {/* BALANCE */}
-          <div className="mb-2">
-            <span className="text-white/70 text-sm">Balance:</span>
-            <div className="text-2xl font-bold">
-              ₦{Number(wallet.balance || 0).toLocaleString()}
-            </div>
+          <div className="mb-4">
+            <div className="text-white/60 text-sm">Available Balance</div>
+            <div className="text-3xl font-bold">₦{wallet.balance}</div>
           </div>
 
-          {/* STATUS */}
-          <div className="mb-3">
-            <span className="text-white/70 text-sm">Status:</span>
-            <span className="ml-1 text-green-400 text-sm">Active</span>
+          {/* QUICK ACTIONS */}
+          <div className="grid grid-cols-3 gap-3 mb-4">
+
+            <button
+              className="bg-[#162033] hover:bg-[#1e2a42] rounded-lg py-2 text-sm"
+            >
+              Fund
+            </button>
+
+            <button
+              className="bg-[#162033] hover:bg-[#1e2a42] rounded-lg py-2 text-sm"
+            >
+              Withdraw
+            </button>
+
+            <button
+              className="bg-[#162033] hover:bg-[#1e2a42] rounded-lg py-2 text-sm"
+            >
+              Transfer
+            </button>
+
           </div>
 
           {/* VIRTUAL ACCOUNT */}
-          {wallet.nuban_account_number ? (
+          {wallet.nuban_account ? (
             <div className="bg-black/20 p-3 rounded-md">
               <div className="text-sm text-white/70">Virtual Account</div>
 
               <div className="font-semibold">
-                {wallet.nuban_account_number}
+                {wallet.nuban_account.account_number}
               </div>
 
               <div className="text-sm text-white/50">
-                {wallet.nuban_account_name || "Providus Bank"}
+                {wallet.nuban_account.bank_name}
               </div>
             </div>
           ) : (
@@ -78,6 +94,8 @@ export default function WalletBox() {
       ) : (
         <div className="text-white/60 text-sm">Loading wallet...</div>
       )}
+
     </div>
   );
 }
+
