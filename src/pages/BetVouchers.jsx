@@ -1,9 +1,9 @@
-```javascript
 import React, { useState } from "react";
 import DashboardLayout from "../layout/DashboardLayout";
 import { Ticket } from "lucide-react";
 
 export default function BetVouchers() {
+
   const [provider, setProvider] = useState("bet9ja");
   const [amount, setAmount] = useState("");
 
@@ -17,14 +17,17 @@ export default function BetVouchers() {
       <div className="max-w-xl">
 
         <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
-          <Ticket size={22} /> Bet Voucher
+          <Ticket size={22} />
+          Bet Voucher
         </h1>
 
         <div className="bg-[#111827] border border-white/10 rounded-xl p-6 space-y-5">
 
-          {/* PROVIDER */}
+          {/* Provider */}
           <div>
-            <label className="text-sm text-white/60">Bet Provider</label>
+            <label className="text-sm text-white/60">
+              Bet Provider
+            </label>
 
             <select
               value={provider}
@@ -34,13 +37,15 @@ export default function BetVouchers() {
               <option value="bet9ja">Bet9ja</option>
               <option value="sporty">SportyBet</option>
               <option value="betking">BetKing</option>
-              <option value="1xbet">1xBet</option>
+              <option value="xbet">1xBet</option>
             </select>
           </div>
 
-          {/* AMOUNT */}
+          {/* Amount */}
           <div>
-            <label className="text-sm text-white/60">Voucher Amount</label>
+            <label className="text-sm text-white/60">
+              Voucher Amount
+            </label>
 
             <input
               type="number"
@@ -51,7 +56,7 @@ export default function BetVouchers() {
             />
           </div>
 
-          {/* BUY BUTTON */}
+          {/* Purchase */}
           <button
             onClick={handlePurchase}
             className="w-full bg-brightOrange text-black font-semibold py-3 rounded-lg"
@@ -66,5 +71,4 @@ export default function BetVouchers() {
     </DashboardLayout>
   );
 }
-```
 
