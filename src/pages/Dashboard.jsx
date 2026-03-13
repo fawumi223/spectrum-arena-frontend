@@ -12,11 +12,11 @@ import {
   Settings,
   TrendingUp,
   Bell,
+  Ticket
 } from "lucide-react";
 
 import DashboardLayout from "../layout/DashboardLayout";
 import WalletBox from "../components/WalletBox";
-import FiltersBar from "../components/jobs/FiltersBar";
 import JobsExplore from "../components/jobs/JobsExplore";
 
 export default function Dashboard() {
@@ -30,12 +30,9 @@ export default function Dashboard() {
   const mockJobsPosted = 0;
   const mockArtisansHired = 0;
 
-  function handleFilters(f) {
-    setFilters(f);
-  }
-
   return (
     <DashboardLayout>
+
       {/* HEADER */}
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -66,8 +63,7 @@ export default function Dashboard() {
         <Metric label="Analytics" value="Coming Soon" icon={<TrendingUp size={18} />} />
       </div>
 
-      {/* JOB FILTERS + JOBS */}
-      <FiltersBar onChange={handleFilters} />
+      {/* JOBS SECTION */}
       <JobsExplore filters={filters} />
 
       {/* SERVICES GRID */}
@@ -124,6 +120,12 @@ export default function Dashboard() {
         />
 
         <Tile
+          label="Bet Vouchers"
+          icon={<Ticket size={22} />}
+          onClick={() => navigate("/bills/bet")}
+        />
+
+        <Tile
           label="Analytics"
           icon={<BarChart2 size={22} />}
           onClick={() => navigate("/analytics")}
@@ -166,6 +168,7 @@ export default function Dashboard() {
   );
 }
 
+
 /* ----------------------
    METRIC COMPONENT
 ----------------------*/
@@ -182,6 +185,7 @@ function Metric({ label, value, icon }) {
   );
 }
 
+
 /* ----------------------
    TILE COMPONENT
 ----------------------*/
@@ -190,13 +194,14 @@ function Tile({ label, icon, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="bg-[#111827] hover:bg-[#162033] border border-white/10 rounded-xl py-5 flex flex-col items-center justify-center gap-2 transition"
+      className="bg-[#111827] hover:bg-[#162033] border border-white/10 rounded-xl py-5 flex flex-col items-center justify-center transition"
     >
       <div className="text-brightOrange">{icon}</div>
       <span className="text-sm font-medium">{label}</span>
     </button>
   );
 }
+
 
 /* ----------------------
    ACTIVITY COMPONENT
