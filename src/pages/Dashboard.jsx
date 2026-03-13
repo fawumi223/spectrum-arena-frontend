@@ -1,4 +1,3 @@
-```javascript
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -121,6 +120,12 @@ export default function Dashboard() {
         />
 
         <Tile
+          label="Cable TV"
+          icon={<BatteryCharging size={22} />}
+          onClick={() => navigate("/bills/cable")}
+         />
+
+        <Tile
           label="Bet Vouchers"
           icon={<Ticket size={22} />}
           onClick={() => navigate("/bills/bet")}
@@ -220,5 +225,4 @@ function Activity({ title, description, amount }) {
     </div>
   );
 }
-```
 
