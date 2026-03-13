@@ -13,7 +13,7 @@ export default function WalletBox() {
   async function loadWallet() {
     try {
       const data = await getWallet();
-      setWallet(data.wallet || null);
+      setWallet(data);
     } catch (e) {
       console.log("Wallet load error:", e);
     }
@@ -38,24 +38,31 @@ export default function WalletBox() {
 
       {wallet ? (
         <>
+          {/* BALANCE */}
           <div className="mb-2">
             <span className="text-white/70 text-sm">Balance:</span>
-            <div className="text-2xl font-bold">₦{wallet.balance}</div>
+            <div className="text-2xl font-bold">
+              ₦{Number(wallet.balance || 0).toLocaleString()}
+            </div>
           </div>
 
+          {/* STATUS */}
           <div className="mb-3">
             <span className="text-white/70 text-sm">Status:</span>
             <span className="ml-1 text-green-400 text-sm">Active</span>
           </div>
 
-          {wallet.nuban_account ? (
+          {/* VIRTUAL ACCOUNT */}
+          {wallet.nuban_account_number ? (
             <div className="bg-black/20 p-3 rounded-md">
               <div className="text-sm text-white/70">Virtual Account</div>
+
               <div className="font-semibold">
-                {wallet.nuban_account.account_number}
+                {wallet.nuban_account_number}
               </div>
+
               <div className="text-sm text-white/50">
-                {wallet.nuban_account.bank_name}
+                {wallet.nuban_account_name || "Providus Bank"}
               </div>
             </div>
           ) : (

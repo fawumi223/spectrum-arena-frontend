@@ -26,14 +26,12 @@ export default function Dashboard() {
 
   const [filters, setFilters] = useState(null);
 
-  // Temporary KPI placeholders (backend later)
   const mockSavings = "₦0.00";
   const mockJobsPosted = 0;
   const mockArtisansHired = 0;
 
   function handleFilters(f) {
     setFilters(f);
-    console.log("Applied Filters:", f);
   }
 
   return (
@@ -55,7 +53,7 @@ export default function Dashboard() {
         </button>
       </div>
 
-      {/* WALLET SECTION */}
+      {/* WALLET */}
       <div className="mb-6 flex flex-wrap gap-6">
         <WalletBox />
       </div>
@@ -68,12 +66,12 @@ export default function Dashboard() {
         <Metric label="Analytics" value="Coming Soon" icon={<TrendingUp size={18} />} />
       </div>
 
-      {/* FILTERS + JOB EXPLORE */}
+      {/* JOB FILTERS + JOBS */}
       <FiltersBar onChange={handleFilters} />
       <JobsExplore filters={filters} />
 
-      {/* QUICK ACTIONS */}
-      <h2 className="text-lg font-semibold mb-3">Quick Actions</h2>
+      {/* SERVICES GRID */}
+      <h2 className="text-lg font-semibold mb-3 mt-10">Services</h2>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-10">
         <Tile label="Find Jobs" icon={<Briefcase size={22} />} onClick={() => navigate("/find-jobs")} />
@@ -89,17 +87,35 @@ export default function Dashboard() {
 
       {/* RECENT ACTIVITY */}
       <h2 className="text-lg font-semibold mb-3">Recent Activity</h2>
-      <div className="bg-[#111827] border border-white/10 rounded-xl p-5">
-        <p className="text-white/50 text-sm">
-          No activity yet. Your recent transactions, job posts, and hires will appear here.
-        </p>
+
+      <div className="bg-[#111827] border border-white/10 rounded-xl p-5 space-y-3">
+
+        <Activity
+          title="Wallet Deposit"
+          description="Funds added to wallet"
+          amount="+ ₦5,000"
+        />
+
+        <Activity
+          title="Data Purchase"
+          description="MTN 3.2GB data bundle"
+          amount="- ₦900"
+        />
+
+        <Activity
+          title="Savings Lock"
+          description="Savings plan created"
+          amount="- ₦2,000"
+        />
+
       </div>
+
     </DashboardLayout>
   );
 }
 
 /* ----------------------
-   COMPONENTS
+   METRIC COMPONENT
 ----------------------*/
 
 function Metric({ label, value, icon }) {
@@ -114,6 +130,10 @@ function Metric({ label, value, icon }) {
   );
 }
 
+/* ----------------------
+   TILE COMPONENT
+----------------------*/
+
 function Tile({ label, icon, onClick }) {
   return (
     <button
@@ -126,3 +146,21 @@ function Tile({ label, icon, onClick }) {
   );
 }
 
+/* ----------------------
+   ACTIVITY COMPONENT
+----------------------*/
+
+function Activity({ title, description, amount }) {
+  return (
+    <div className="flex justify-between items-center border-b border-white/5 pb-2">
+
+      <div>
+        <div className="text-sm font-medium">{title}</div>
+        <div className="text-xs text-white/50">{description}</div>
+      </div>
+
+      <div className="text-sm font-semibold">{amount}</div>
+
+    </div>
+  );
+}
