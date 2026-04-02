@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 export default function WalletBox() {
   const [loading, setLoading] = useState(false);
   const [wallet, setWallet] = useState(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     loadWallet();
@@ -14,8 +15,10 @@ export default function WalletBox() {
     try {
       const data = await getWallet();
       setWallet(data);
+      setError("");
     } catch (e) {
       console.log("Wallet load error:", e);
+      setError("Failed to load wallet");
     }
   }
 
@@ -32,70 +35,79 @@ export default function WalletBox() {
     }
   }
 
+  function formatMoney(amount) {
+    if (!amount && amount !== 0) return "--";
+    return `₦${Number(amount).toLocaleString()}`;
+  }
+
   return (
-    <div className="bg-[#101725] text-white p-6 rounded-xl w-full max-w-lg">
+    <div className="bg-gradient-to-br from-[#0f172a] to-[#020617] text-white p-5 rounded-2xl w-full shadow-xl border border-white/10">
 
-      <h3 className="text-lg font-semibold mb-3">Wallet</h3>
+      {/* HEADER */}
+      <div className="flex justify-between items-center mb-4 text-sm text-gray-400">
+        <span>Wallet Balance</span>
+        <span>NGN</span>
+      </div>
 
-      {wallet ? (
-        <>
-          {/* BALANCE */}
-          <div className="mb-4">
-            <div className="text-white/60 text-sm">Available Balance</div>
-            <div className="text-3xl font-bold">₦{wallet.balance}</div>
+      {/* BALANCE */}
+      <div className="text-3xl font-bold mb-4">
+
+        {!wallet && !error && (
+          <div className="animate-pulse h-8 w-32 bg-gray-700 rounded" />
+        )}
+
+        {error && (
+          <span className="text-red-400 text-sm">{error}</span>
+        )}
+
+        {wallet && !error && formatMoney(wallet.balance)}
+
+      </div>
+
+      {/* ACTIONS */}
+      <div className="grid grid-cols-3 gap-3 mb-5">
+
+        <button className="bg-orange-500 hover:opacity-90 rounded-lg py-2 text-sm font-semibold">
+          Fund
+        </button>
+
+        <button className="bg-[#111827] hover:bg-[#1e293b] rounded-lg py-2 text-sm">
+          Withdraw
+        </button>
+
+        <button className="bg-[#111827] hover:bg-[#1e293b] rounded-lg py-2 text-sm">
+          Transfer
+        </button>
+
+      </div>
+
+      {/* VIRTUAL ACCOUNT */}
+      {wallet && wallet.nuban_account ? (
+        <div className="bg-black/30 p-3 rounded-xl border border-white/10">
+
+          <div className="text-xs text-gray-400 mb-1">
+            Virtual Account
           </div>
 
-          {/* QUICK ACTIONS */}
-          <div className="grid grid-cols-3 gap-3 mb-4">
-
-            <button
-              className="bg-[#162033] hover:bg-[#1e2a42] rounded-lg py-2 text-sm"
-            >
-              Fund
-            </button>
-
-            <button
-              className="bg-[#162033] hover:bg-[#1e2a42] rounded-lg py-2 text-sm"
-            >
-              Withdraw
-            </button>
-
-            <button
-              className="bg-[#162033] hover:bg-[#1e2a42] rounded-lg py-2 text-sm"
-            >
-              Transfer
-            </button>
-
+          <div className="text-lg font-semibold tracking-wider">
+            {wallet.nuban_account.account_number}
           </div>
 
-          {/* VIRTUAL ACCOUNT */}
-          {wallet.nuban_account ? (
-            <div className="bg-black/20 p-3 rounded-md">
-              <div className="text-sm text-white/70">Virtual Account</div>
+          <div className="text-xs text-gray-500">
+            {wallet.nuban_account.bank_name}
+          </div>
 
-              <div className="font-semibold">
-                {wallet.nuban_account.account_number}
-              </div>
-
-              <div className="text-sm text-white/50">
-                {wallet.nuban_account.bank_name}
-              </div>
-            </div>
-          ) : (
-            <button
-              disabled={loading}
-              onClick={activateAccount}
-              className="mt-2 bg-brightOrange text-deepBlue font-semibold px-4 py-2 rounded-md w-full"
-            >
-              {loading ? "Activating..." : "Activate Virtual Account"}
-            </button>
-          )}
-        </>
-      ) : (
-        <div className="text-white/60 text-sm">Loading wallet...</div>
-      )}
+        </div>
+      ) : wallet ? (
+        <button
+          disabled={loading}
+          onClick={activateAccount}
+          className="w-full mt-2 bg-orange-500 hover:opacity-90 text-[#020617] font-semibold py-3 rounded-xl"
+        >
+          {loading ? "Activating..." : "Activate Virtual Account"}
+        </button>
+      ) : null}
 
     </div>
   );
 }
-

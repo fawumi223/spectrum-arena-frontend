@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Briefcase,
@@ -10,219 +10,151 @@ import {
   BatteryCharging,
   BarChart2,
   Settings,
-  TrendingUp,
   Bell,
   Ticket
 } from "lucide-react";
 
-import DashboardLayout from "../layout/DashboardLayout";
 import WalletBox from "../components/WalletBox";
 import JobsExplore from "../components/jobs/JobsExplore";
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const firstName = user.full_name ? user.full_name.split(" ")[0] : "User";
-
-  const [filters] = useState(null);
-
-  const mockSavings = "₦0.00";
-  const mockJobsPosted = 0;
-  const mockArtisansHired = 0;
+  const firstName = user.full_name?.split(" ")[0] || "User";
 
   return (
-    <DashboardLayout>
+    <div className="p-4 space-y-6">
 
       {/* HEADER */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold">Hi, {firstName} 👋</h1>
-          <p className="text-white/60 text-sm mt-1">
-            Welcome back. Let’s get things done today!
-          </p>
+      <div className="flex justify-between items-center">
+
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center font-bold">
+            {firstName[0]}
+          </div>
+
+          <div>
+            <h1 className="text-lg font-semibold">
+              Hi, {firstName} 👋
+            </h1>
+            <p className="text-gray-400 text-xs">
+              Welcome back. Let’s get things done.
+            </p>
+          </div>
         </div>
 
         <button
-          className="p-2 rounded-lg bg-[#111827] border border-white/10 hover:bg-[#162033] transition"
           onClick={() => navigate("/notifications")}
+          className="bg-[#0f172a] p-3 rounded-xl shadow-md"
         >
           <Bell size={18} />
         </button>
+
       </div>
 
-      {/* WALLET */}
-      <div className="mb-6 flex flex-wrap gap-6">
+      {/* WALLET (HERO CARD) */}
+      <div className="bg-gradient-to-br from-[#0f172a] to-[#020617] rounded-2xl p-5 shadow-xl border border-white/10">
         <WalletBox />
       </div>
 
-      {/* KPI METRICS */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
-        <Metric label="Savings" value={mockSavings} icon={<PiggyBank size={18} />} />
-        <Metric label="Jobs Posted" value={mockJobsPosted} icon={<Briefcase size={18} />} />
-        <Metric label="Artisans Hired" value={mockArtisansHired} icon={<Search size={18} />} />
-        <Metric label="Analytics" value="Coming Soon" icon={<TrendingUp size={18} />} />
+      {/* STATS */}
+      <div className="grid grid-cols-3 gap-3">
+        <Stat label="Savings" value="₦0" />
+        <Stat label="Jobs" value="0" />
+        <Stat label="Hires" value="0" />
       </div>
 
-      {/* JOBS SECTION */}
-      <JobsExplore filters={filters} />
+      {/* SEARCH */}
+      <input
+        placeholder="Search artisans..."
+        className="w-full bg-[#0f172a] p-3 rounded-xl outline-none border border-white/10 focus:border-orange-500"
+      />
 
-      {/* SERVICES GRID */}
-      <h2 className="text-lg font-semibold mb-3 mt-10">Services</h2>
+      {/* JOBS */}
+      <JobsExplore />
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-10">
+      {/* ARTISANS */}
+      <div className="space-y-3">
+        <h3 className="text-sm text-gray-400">Recommended Artisans</h3>
 
-        <Tile
-          label="Services"
-          icon={<Smartphone size={22} />}
-          onClick={() => navigate("/services")}
-        />
+        {[1,2,3].map((i) => (
+          <div key={i} className="bg-[#0f172a] p-3 rounded-xl flex justify-between items-center border border-white/5 shadow-sm">
 
-        <Tile
-          label="Find Jobs"
-          icon={<Briefcase size={22} />}
-          onClick={() => navigate("/find-jobs")}
-        />
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gray-700 rounded-full" />
 
-        <Tile
-          label="Find Artisans"
-          icon={<Search size={22} />}
-          onClick={() => navigate("/find-artisans")}
-        />
+              <div>
+                <p className="text-sm font-semibold">Tolu</p>
+                <p className="text-xs text-gray-400">Electrician</p>
+              </div>
+            </div>
 
-        <Tile
-          label="Post a Job"
-          icon={<PlusCircle size={22} />}
-          onClick={() => navigate("/post-job")}
-        />
+            <p className="text-orange-400 font-semibold">₦3,000</p>
 
-        <Tile
-          label="Savings"
-          icon={<PiggyBank size={22} />}
-          onClick={() => navigate("/savings")}
-        />
+          </div>
+        ))}
+      </div>
 
-        <Tile
-          label="Buy Airtime"
-          icon={<Smartphone size={22} />}
-          onClick={() => navigate("/bills/airtime")}
-        />
+      {/* SERVICES */}
+      <h2 className="text-sm text-gray-400">Services</h2>
 
-        <Tile
-          label="Buy Data"
-          icon={<Wifi size={22} />}
-          onClick={() => navigate("/bills/data")}
-        />
+      <div className="grid grid-cols-3 gap-3">
 
-        <Tile
-          label="Electricity"
-          icon={<BatteryCharging size={22} />}
-          onClick={() => navigate("/bills/electricity")}
-        />
+        <Service icon={<Briefcase size={18} />} label="Jobs" onClick={() => navigate("/find-jobs")} />
+        <Service icon={<Search size={18} />} label="Artisans" onClick={() => navigate("/find-artisans")} />
+        <Service icon={<PlusCircle size={18} />} label="Post Job" onClick={() => navigate("/post-job")} />
 
-        <Tile
-          label="Cable TV"
-          icon={<BatteryCharging size={22} />}
-          onClick={() => navigate("/bills/cable")}
-         />
+        <Service icon={<PiggyBank size={18} />} label="Savings" onClick={() => navigate("/savings")} />
+        <Service icon={<Smartphone size={18} />} label="Airtime" onClick={() => navigate("/bills/airtime")} />
+        <Service icon={<Wifi size={18} />} label="Data" onClick={() => navigate("/bills/data")} />
 
-        <Tile
-          label="Bet Vouchers"
-          icon={<Ticket size={22} />}
-          onClick={() => navigate("/bills/bet")}
-        />
-
-        <Tile
-          label="Analytics"
-          icon={<BarChart2 size={22} />}
-          onClick={() => navigate("/analytics")}
-        />
-
-        <Tile
-          label="Settings"
-          icon={<Settings size={22} />}
-          onClick={() => navigate("/settings")}
-        />
+        <Service icon={<BatteryCharging size={18} />} label="Electricity" onClick={() => navigate("/bills/electricity")} />
+        <Service icon={<Ticket size={18} />} label="Bet" onClick={() => navigate("/bills/bet")} />
+        <Service icon={<BarChart2 size={18} />} label="Analytics" onClick={() => navigate("/analytics")} />
 
       </div>
 
-      {/* RECENT ACTIVITY */}
-      <h2 className="text-lg font-semibold mb-3">Recent Activity</h2>
+      {/* ACTIVITY */}
+      <h2 className="text-sm text-gray-400">Recent Activity</h2>
 
-      <div className="bg-[#111827] border border-white/10 rounded-xl p-5 space-y-3">
-
-        <Activity
-          title="Wallet Deposit"
-          description="Funds added to wallet"
-          amount="+ ₦5,000"
-        />
-
-        <Activity
-          title="Data Purchase"
-          description="MTN 3.2GB data bundle"
-          amount="- ₦900"
-        />
-
-        <Activity
-          title="Savings Lock"
-          description="Savings plan created"
-          amount="- ₦2,000"
-        />
-
+      <div className="bg-[#0f172a] rounded-xl p-4 space-y-3 border border-white/5 shadow-sm">
+        <Activity title="Wallet Deposit" amount="+ ₦5,000" />
+        <Activity title="Data Purchase" amount="- ₦900" />
+        <Activity title="Savings Lock" amount="- ₦2,000" />
       </div>
 
-    </DashboardLayout>
-  );
-}
-
-
-/* ----------------------
-   METRIC COMPONENT
-----------------------*/
-
-function Metric({ label, value, icon }) {
-  return (
-    <div className="bg-[#111827] border border-white/10 rounded-xl p-4 flex flex-col">
-      <div className="flex items-center gap-2 text-white/70 text-xs">
-        {icon}
-        <span>{label}</span>
-      </div>
-      <div className="text-lg font-semibold mt-1">{value}</div>
     </div>
   );
 }
 
+/* ---------------- COMPONENTS ---------------- */
 
-/* ----------------------
-   TILE COMPONENT
-----------------------*/
+function Stat({ label, value }) {
+  return (
+    <div className="bg-[#0f172a] p-4 rounded-xl text-center border border-white/5 shadow-sm">
+      <p className="text-xs text-gray-400">{label}</p>
+      <h3 className="font-bold text-lg mt-1">{value}</h3>
+    </div>
+  );
+}
 
-function Tile({ label, icon, onClick }) {
+function Service({ icon, label, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="bg-[#111827] hover:bg-[#162033] border border-white/10 rounded-xl py-5 flex flex-col items-center justify-center transition"
+      className="bg-[#0f172a] rounded-xl py-4 flex flex-col items-center gap-1 border border-white/5 hover:border-orange-500 hover:scale-105 transition"
     >
-      <div className="text-brightOrange">{icon}</div>
-      <span className="text-sm font-medium">{label}</span>
+      <div className="text-orange-400">{icon}</div>
+      <span className="text-xs">{label}</span>
     </button>
   );
 }
 
-
-/* ----------------------
-   ACTIVITY COMPONENT
-----------------------*/
-
-function Activity({ title, description, amount }) {
+function Activity({ title, amount }) {
   return (
-    <div className="flex justify-between items-center border-b border-white/5 pb-2">
-      <div>
-        <div className="text-sm font-medium">{title}</div>
-        <div className="text-xs text-white/50">{description}</div>
-      </div>
-
-      <div className="text-sm font-semibold">{amount}</div>
+    <div className="flex justify-between text-sm">
+      <span>{title}</span>
+      <span className="font-semibold">{amount}</span>
     </div>
   );
 }
-
