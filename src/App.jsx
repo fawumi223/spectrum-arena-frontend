@@ -143,16 +143,26 @@ function LoginModal({ onClose }) {
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
       <div className="bg-[#0d0f14] text-white rounded-xl p-6 w-full max-w-md">
-        <button onClick={onClose}><ArrowLeft /></button>
+        
+        <button onClick={onClose}>
+          <ArrowLeft />
+        </button>
+
         <h4 className="text-center font-bold mb-4">Log in</h4>
 
-        {error && <ErrorState text={error} />}
+        {/* ERROR UI (FIXED) */}
+        {error && (
+          <div className="bg-red-500/10 border border-red-500 text-red-400 p-2 rounded text-sm mb-3 text-center">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={submit}>
           <button className="bg-orange-500 w-full p-3 rounded">
             Log in
           </button>
         </form>
+
       </div>
     </div>
   );
