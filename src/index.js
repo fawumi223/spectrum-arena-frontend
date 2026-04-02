@@ -5,6 +5,9 @@ import App from "./App";
 import AuthProvider from "./context/AuthContext";
 import reportWebVitals from "./reportWebVitals";
 
+// 👇 ADD THIS
+import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <AuthProvider>
@@ -12,5 +15,7 @@ root.render(
   </AuthProvider>
 );
 
-reportWebVitals();
+// 👇 ADD THIS
+serviceWorkerRegistration.register();
 
+reportWebVitals();
