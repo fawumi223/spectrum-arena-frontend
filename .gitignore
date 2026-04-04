@@ -11,6 +11,16 @@
 # production
 /build
 
+# next.js
+.next/
+
+# custom build folder (VERY IMPORTANT)
+spectrum-arena-frontend-build/
+
+# optional build outputs
+out/
+dist/
+
 # misc
 .DS_Store
 .env.local
